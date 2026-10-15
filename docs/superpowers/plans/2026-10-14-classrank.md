@@ -410,36 +410,37 @@ git commit -m "feat: add CSV/XLSX import parser factory"
 
 **Files:**
 - Create: `src/stores/auth.js`, `src/router/index.js`, `src/views/LoginView.vue`
+- Create (minimal placeholder stubs — a trivial single-element template each, e.g. `<template><div>Em construção</div></template>`; later tasks overwrite these with real implementations): `src/views/HomeView.vue`, `src/views/RankingView.vue`, `src/views/ConquistasView.vue`, `src/views/TurmasView.vue`, `src/views/SobreView.vue`, `src/views/PublicTurmaView.vue`
 - Modify: `src/main.js`, `src/App.vue`
 - Test: `src/stores/__tests__/auth.test.js`
 
 **Interfaces:**
 - Consumes: `supabase` (Task 3).
-- Produces: `useAuthStore()` with state `{ user, loading, error }`, actions `signIn(email, password)` (sets `error` instead of throwing when `supabase.auth.signInWithPassword` rejects/returns an error), `signOut()`, `restoreSession()`; router with public routes `/login`, `/sobre`, `/t/:slug` and protected routes `/`, `/ranking`, `/conquistas`, `/turmas` requiring `authStore.user` via `router.beforeEach`, redirecting protected-route access to `/login` when absent.
+- Produces: `useAuthStore()` with state `{ user, loading, error }`, actions `signIn(email, password)` (sets `error` instead of throwing when `supabase.auth.signInWithPassword` rejects/returns an error), `signOut()` (clears `user`, sets `error` on failure), `restoreSession()` (reads `supabase.auth.getSession()` and sets `user` if a session exists — called once from `main.js` before mount so a page refresh doesn't bounce a logged-in professor to `/login`); router with public routes `/login`, `/sobre`, `/t/:slug` and protected routes `/`, `/ranking`, `/conquistas`, `/turmas` requiring `authStore.user` via `router.beforeEach`, redirecting protected-route access to `/login` when absent. Each protected/public route points at the matching placeholder stub view above (Tasks 18/19/21/22 later overwrite them).
 
-- [ ] **Step 1: Write failing tests for `auth.js`**
-
-Using `@pinia/testing` or a manual `setActivePinia(createPinia())`, mock `supabase.auth.signInWithPassword` to resolve `{ data: { user: { id: '1' } }, error: null }`; assert `store.signIn('a@a.com','x')` sets `store.user` to that user. Add a second test mocking it to resolve `{ data: { user: null }, error: { message: 'Invalid login credentials' } }`; assert `store.error` is set to that message and `store.user` stays `null` (no throw).
+- [ ] **Step 1: Write failing tests for `auth.js`** covering all three actions: `signIn` success and failure (mock `supabase.auth.signInWithPassword` resolving `{ data: { user: {...} }, error: null }` vs `{ data: { user: null }, error: { message: 'Invalid login credentials' } }` — assert `store.user`/`store.error` accordingly, never a throw), `signOut` success and failure (mock `supabase.auth.signOut` resolving `{ error: null }` vs `{ error: {...} }`), `restoreSession` with and without an existing session (mock `supabase.auth.getSession` resolving `{ data: { session: { user: {...} } } }` vs `{ data: { session: null } }`).
 
 - [ ] **Step 2: Run tests to verify they fail.**
 
-- [ ] **Step 3: Implement `auth.js`** (Pinia `defineStore('auth', ...)` with the actions above, wrapping `supabase.auth`).
+- [ ] **Step 3: Implement `auth.js`** (Pinia `defineStore('auth', ...)` with the actions above, wrapping `supabase.auth`, each action resetting `error` to `null` at the start of the call).
 
 - [ ] **Step 4: Run tests to verify they pass.**
 
-- [ ] **Step 5: Implement `router/index.js`** with `createRouter`/`createWebHistory`, routes for `/login`, `/sobre` (public), `/t/:slug` (public — component wired in Task 18), `/`, `/ranking`, `/conquistas`, `/turmas` (protected; components wired to stub views where not yet built — later tasks fill them in), and the `beforeEach` guard: only the protected group redirects to `/login` when `authStore.user` is absent.
+- [ ] **Step 5: Create the 6 placeholder stub views** listed above.
 
-- [ ] **Step 6: Implement `LoginView.vue`** — email/password form calling `authStore.signIn`, shows `authStore.error` inline instead of crashing on bad credentials.
+- [ ] **Step 6: Implement `router/index.js`** with `createRouter`/`createWebHistory`, routes: `/login` → `LoginView`, `/sobre` → `SobreView`, `/t/:slug` → `PublicTurmaView` (all public); `/` → `HomeView`, `/ranking` → `RankingView`, `/conquistas` → `ConquistasView`, `/turmas` → `TurmasView` (all protected). The `beforeEach` guard: only the protected group redirects to `/login` when `authStore.user` is absent.
 
-- [ ] **Step 7: Wire `main.js`** to install Pinia and the router before mount; `App.vue` becomes `<RouterView />` (layout added in Task 16).
+- [ ] **Step 7: Implement `LoginView.vue`** — email/password form calling `authStore.signIn`, shows `authStore.error` inline instead of crashing on bad credentials.
 
-- [ ] **Step 8: Manual check** — Run `npm run dev`, confirm navigating to `/` redirects to `/login` when logged out.
+- [ ] **Step 8: Wire `main.js`** to install Pinia and the router before mount, then call `authStore.restoreSession()` before mounting; `App.vue` becomes `<RouterView />` (layout added in Task 16).
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 9: Manual check** — Run `npm run dev`, confirm navigating to `/` redirects to `/login` when logged out, and that `/sobre` and `/t/some-fake-slug` load without redirecting.
+
+- [ ] **Step 10: Commit**
 
 ```bash
-git add src/stores/auth.js src/router src/views/LoginView.vue src/main.js src/App.vue src/stores/__tests__
-git commit -m "feat: add auth store, router guard and login view"
+git add src/stores/auth.js src/router src/views src/main.js src/App.vue src/stores/__tests__
+git commit -m "feat: add auth store, router guard, login view and placeholder views"
 ```
 
 ---
