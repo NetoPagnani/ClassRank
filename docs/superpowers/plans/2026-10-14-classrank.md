@@ -193,17 +193,17 @@ git commit -m "feat: add turmas and materias repositories"
 
 **Interfaces:**
 - Consumes: `supabase` (Task 3).
-- Produces: `alunosRepository = { listByTurma(turmaId), create({turmaId, nome, fotoUrl}), update(id, patch), remove(id) }`; `storageRepository = { uploadAvatar(alunoId, file): Promise<string /* public URL */> }`. `uploadAvatar` MUST upload to path `${(await supabase.auth.getUser()).data.user.id}/${alunoId}-${file.name}` inside the `avatars` bucket (not a bare `${alunoId}` path) — the bucket's RLS policies (added in a post-Task-2 isolation fix) require the object's first path segment to equal the uploader's own `auth.uid()`, so any other path shape is rejected by the database regardless of what the JS code does.
+- Produces: `alunosRepository = { listByTurma(turmaId), create({turmaId, nome, fotoUrl}), update(id, patch), remove(id) }` — `create(...)` resolves with the full inserted row (`.select().single()`, same pattern as Task 4). `storageRepository = { uploadAvatar(alunoId, file): Promise<string /* public URL */> }`. `uploadAvatar` MUST upload to path `${(await supabase.auth.getUser()).data.user.id}/${alunoId}-${file.name}` inside the `avatars` bucket (not a bare `${alunoId}` path) — the bucket's RLS policies (added in a post-Task-2 isolation fix) require the object's first path segment to equal the uploader's own `auth.uid()`, so any other path shape is rejected by the database regardless of what the JS code does.
 
 - [ ] **Step 1: Write the failing test for `alunosRepository.listByTurma(turmaId)`** — mock `.from('alunos').select().eq('turma_id', turmaId)` to resolve `{data: [{id:'1', turma_id: 't1', nome:'Ana', foto_url: null}], error: null}`; assert the returned array.
 
 - [ ] **Step 2: Run test to verify it fails.**
 
-- [ ] **Step 3: Implement `alunosRepository.js`** with `listByTurma`, `create`, `update`, `remove`.
+- [ ] **Step 3: Implement `alunosRepository.js`** with `listByTurma`, `create` (returns the inserted row), `update`, `remove`.
 
 - [ ] **Step 4: Run test to verify it passes.**
 
-- [ ] **Step 5: Write the failing test for `storageRepository.uploadAvatar(alunoId, file)`** — mock `supabase.storage.from('avatars').upload(...)` to resolve `{data: {path: 'aluno-1.png'}, error: null}` and `.getPublicUrl(...)` to return `{data: {publicUrl: 'https://.../aluno-1.png'}}`; assert the function resolves to that URL string.
+- [ ] **Step 5: Write the failing test for `storageRepository.uploadAvatar(alunoId, file)`** — mock `supabase.auth.getUser()` to resolve `{ data: { user: { id: 'uid-1' } } }`; mock `supabase.storage.from('avatars').upload(...)` to resolve `{data: {path: 'uid-1/aluno-1-foto.png'}, error: null}` and `.getPublicUrl(...)` to return `{data: {publicUrl: 'https://.../uid-1/aluno-1-foto.png'}}`; assert the function resolves to that URL string AND assert the mocked `upload` call's path argument was exactly `uid-1/aluno-1-foto.png` (`${userId}/${alunoId}-${file.name}`) — this is what actually enforces the path convention above.
 
 - [ ] **Step 6: Run test to verify it fails, then implement `storageRepository.js`**, then run again to verify it passes.
 
