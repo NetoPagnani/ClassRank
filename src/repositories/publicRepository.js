@@ -9,7 +9,7 @@ async function callRpc(fn, args) {
 export const publicRepository = {
   async getTurmaBySlug(slug) {
     const rows = await callRpc('rpc_turma_publica', { p_slug: slug })
-    return rows[0] ?? null
+    return rows?.[0] ?? null
   },
 
   async getRankingPublico(slug, materiaId) {
@@ -22,6 +22,6 @@ export const publicRepository = {
 
   async getMissaoPublica(slug) {
     const rows = await callRpc('rpc_missao_publica', { p_slug: slug })
-    return rows[0] ?? null
+    return rows?.[0] ?? null
   }
 }
