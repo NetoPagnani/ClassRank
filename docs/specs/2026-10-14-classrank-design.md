@@ -155,8 +155,10 @@ por funções Postgres `SECURITY DEFINER` (RPC), cada uma recebendo o
 `rpc_turma_publica(slug)`, `rpc_ranking_publico(slug, materia_id)`,
 `rpc_conquistas_publicas(slug)`, `rpc_missao_publica(slug)`. O papel
 `anon` recebe `GRANT EXECUTE` só nessas funções, nunca `SELECT` nas
-tabelas. Bucket `avatars`: leitura pública (fotos precisam aparecer na
-rota pública), escrita só `authenticated`.
+tabelas. Bucket `avatars`: leitura pública por URL (fotos precisam
+aparecer na rota pública); leitura/escrita autenticada restrita ao
+próprio professor via prefixo de pasta `${auth.uid()}/...` no nome do
+objeto (um professor não lista nem altera o arquivo de outro).
 
 ## Tema visual — Retro Arcade 2D
 
