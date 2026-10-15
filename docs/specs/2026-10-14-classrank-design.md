@@ -141,7 +141,12 @@ missoes_semanais(id, turma_id fk, titulo, descricao, meta, progresso_atual, sema
 criação da turma — é o token do link público `/t/:slug`.
 
 **RLS e acesso público**: todas as 9 tabelas têm RLS habilitado e só
-permitem `authenticated` (o professor). O papel `anon` **não** tem acesso
+permitem contas `authenticated` com e-mail `@professor.educacao.sp.gov.br`
+(qualquer professor real da rede, não um único e-mail fixo), **isolado por
+professor** — `turmas`/`materias` têm dono (`professor_id`), e as demais
+tabelas herdam esse dono através da turma/aluno relacionado. Um professor
+nunca vê ou edita a turma de outro; só `conquistas` (catálogo fixo) é
+compartilhado. O papel `anon` **não** tem acesso
 direto a nenhuma tabela — mesmo que alguém tente consultar a API REST do
 Supabase diretamente, não há como listar turmas, alunos ou notas de
 outras turmas. O acesso público da rota `/t/:slug` passa exclusivamente
