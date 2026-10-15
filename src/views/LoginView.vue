@@ -12,7 +12,7 @@ const password = ref('')
 async function handleSubmit() {
   await authStore.signIn(email.value, password.value)
   if (authStore.user) {
-    router.push('/')
+    router.push({ name: 'home' })
   }
 }
 </script>

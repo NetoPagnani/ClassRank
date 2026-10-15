@@ -18,7 +18,7 @@ const routes = [
   { path: '/t/:slug', name: 'public-turma', component: PublicTurmaView }
 ]
 
-export const router = createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes
 })

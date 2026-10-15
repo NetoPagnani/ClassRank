@@ -45,7 +45,7 @@ describe('useAuthStore', () => {
       })
       const store = useAuthStore()
 
-      await expect(store.signIn('a@a.com', 'wrong')).resolves.not.toThrow()
+      await expect(store.signIn('a@a.com', 'wrong')).resolves.toBeUndefined()
 
       expect(store.user).toBeNull()
       expect(store.error).toBe('Invalid login credentials')
