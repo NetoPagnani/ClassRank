@@ -44,6 +44,14 @@ async function criarMateria() {
   novaMateriaNome.value = ''
 }
 
+async function excluirMateria(materia) {
+  const confirmado = window.confirm(
+    `Excluir a matéria "${materia.nome}"? Isso apaga também as tarefas, notas e avaliações lançadas nela. Essa ação não pode ser desfeita.`
+  )
+  if (!confirmado) return
+  await materiasStore.remove(materia.id)
+}
+
 async function criarAluno() {
   if (!novoAlunoNome.value.trim() || !turmaSelecionadaId.value) return
   await alunosStore.add({ turmaId: turmaSelecionadaId.value, nome: novoAlunoNome.value.trim() })
@@ -77,9 +85,15 @@ async function copiarLink(slug) {
         <li
           v-for="materia in materiasStore.items"
           :key="materia.id"
-          class="pixel-corners bg-rank-navy px-3 py-1"
+          class="pixel-corners bg-rank-navy px-3 py-1 flex items-center gap-2"
         >
           {{ materia.nome }}
+          <button
+            class="pixel-corners px-2 text-base font-retro bg-red-900 border-2 border-black text-red-100"
+            @click="excluirMateria(materia)"
+          >
+            Excluir
+          </button>
         </li>
       </ul>
       <form class="flex gap-2 font-retro text-xl" @submit.prevent="criarMateria">

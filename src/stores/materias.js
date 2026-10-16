@@ -27,5 +27,16 @@ export const useMateriasStore = defineStore('materias', () => {
     }
   }
 
-  return { items, selectedId, error, fetchAll, add }
+  async function remove(id) {
+    error.value = null
+    try {
+      await materiasRepository.remove(id)
+      items.value = items.value.filter((materia) => materia.id !== id)
+      if (selectedId.value === id) selectedId.value = null
+    } catch (err) {
+      error.value = err.message
+    }
+  }
+
+  return { items, selectedId, error, fetchAll, add, remove }
 })
