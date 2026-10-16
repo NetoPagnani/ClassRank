@@ -22,7 +22,7 @@ const COROAS = { 0: '👑', 1: '🥈', 2: '🥉' }
           :class="BORDAS[posicao]"
         >
           <img
-            :src="linhas[posicao].aluno.fotoUrl || avatarPadrao(linhas[posicao].aluno.id)"
+            :src="linhas[posicao].aluno.fotoUrl || avatarPadrao(linhas[posicao].aluno.nome)"
             :alt="linhas[posicao].aluno.nome"
             class="w-full h-full object-cover"
           />

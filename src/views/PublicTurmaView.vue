@@ -3,7 +3,6 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { publicRepository } from '../repositories/publicRepository.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
-import { avatarPadrao } from '../utils/avatarPadrao.js'
 import logo from '../assets/logo.png'
 import bau from '../assets/bau.png'
 
@@ -73,35 +72,10 @@ const linhasPodio = computed(() =>
 
         <template v-if="materiaId">
           <PodiumTop3 v-if="linhasPodio.length > 0" :linhas="linhasPodio" />
-
-          <table class="min-w-full text-sm text-xl">
-            <thead>
-              <tr class="text-left border-b border-rank-navy text-rank-gold">
-                <th class="p-2">#</th>
-                <th class="p-2">Foto</th>
-                <th class="p-2">Aluno</th>
-                <th class="p-2">Nota final</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(linha, index) in ranking"
-                :key="linha.aluno_id"
-                :class="index < 3 ? 'bg-rank-navy' : ''"
-                class="border-b border-rank-navy"
-              >
-                <td class="p-2">{{ index + 1 }}º {{ index < 3 ? '🏆' : '' }}</td>
-                <td class="p-2">
-                  <img
-                    :src="linha.foto_url || avatarPadrao(linha.aluno_id)"
-                    class="pixel-corners w-8 h-8 object-cover border-2 border-rank-gold"
-                  />
-                </td>
-                <td class="p-2">{{ linha.nome }}</td>
-                <td class="p-2 font-pixel text-xs text-rank-gold">{{ Number(linha.nota_final).toFixed(1) }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <p v-else class="text-slate-200 text-sm text-center">Ainda não há notas lançadas nesta matéria.</p>
+          <p v-if="ranking.length > 3" class="text-slate-200 text-sm text-center">
+            + {{ ranking.length - 3 }} aluno(s) também participando dessa turma 🎮
+          </p>
         </template>
         <p v-if="materias.length === 0" class="text-slate-200 text-sm">
           Nenhuma matéria com tarefas ainda.

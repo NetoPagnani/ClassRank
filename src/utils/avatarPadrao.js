@@ -1,11 +1,18 @@
-import avatar1 from '../assets/avatar-padrao-1.png'
-import avatar2 from '../assets/avatar-padrao-2.png'
+import avatarFeminino from '../assets/avatar-padrao-1.png'
+import avatarMasculino from '../assets/avatar-padrao-2.png'
 
-const avatares = [avatar1, avatar2]
+export const AVATARES_PADRAO = [
+  { id: 'feminino', url: avatarFeminino },
+  { id: 'masculino', url: avatarMasculino }
+]
 
-/** Escolhe um avatar padrão de forma estável por aluno (mesmo id, mesmo avatar). */
-export function avatarPadrao(id) {
-  if (!id) return avatar1
-  const soma = [...id].reduce((total, char) => total + char.charCodeAt(0), 0)
-  return avatares[soma % avatares.length]
+/**
+ * Escolhe um avatar padrão pelo nome do aluno (heurística simples: nomes
+ * terminados em "a" tendem a ser femininos em português). Não é perfeito,
+ * mas acerta a maioria dos casos — bem melhor que sortear ao acaso.
+ */
+export function avatarPadrao(nome) {
+  if (!nome) return avatarMasculino
+  const primeiroNome = nome.trim().split(/\s+/)[0].toLowerCase()
+  return primeiroNome.endsWith('a') ? avatarFeminino : avatarMasculino
 }

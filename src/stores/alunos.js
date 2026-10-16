@@ -55,5 +55,47 @@ export const useAlunosStore = defineStore('alunos', () => {
     }
   }
 
-  return { itemsByTurma, error, fetchByTurma, add, uploadFoto }
+  async function definirFoto(alunoId, fotoUrl) {
+    error.value = null
+    try {
+      await alunosRepository.update(alunoId, { fotoUrl })
+      const aluno = Object.values(itemsByTurma.value)
+        .flat()
+        .find((a) => a.id === alunoId)
+      if (aluno) {
+        aluno.fotoUrl = fotoUrl
+      }
+    } catch (err) {
+      error.value = err.message
+    }
+  }
+
+  async function renomear(alunoId, nome) {
+    error.value = null
+    try {
+      await alunosRepository.update(alunoId, { nome })
+      const aluno = Object.values(itemsByTurma.value)
+        .flat()
+        .find((a) => a.id === alunoId)
+      if (aluno) {
+        aluno.nome = nome
+      }
+    } catch (err) {
+      error.value = err.message
+    }
+  }
+
+  async function remove(alunoId, turmaId) {
+    error.value = null
+    try {
+      await alunosRepository.remove(alunoId)
+      if (itemsByTurma.value[turmaId]) {
+        itemsByTurma.value[turmaId] = itemsByTurma.value[turmaId].filter((a) => a.id !== alunoId)
+      }
+    } catch (err) {
+      error.value = err.message
+    }
+  }
+
+  return { itemsByTurma, error, fetchByTurma, add, uploadFoto, definirFoto, renomear, remove }
 })

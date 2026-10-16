@@ -18,7 +18,10 @@ export const alunosRepository = {
   },
 
   async update(id, patch) {
-    const { error } = await supabase.from('alunos').update(patch).eq('id', id)
+    const dbPatch = {}
+    if (patch.nome !== undefined) dbPatch.nome = patch.nome
+    if (patch.fotoUrl !== undefined) dbPatch.foto_url = patch.fotoUrl
+    const { error } = await supabase.from('alunos').update(dbPatch).eq('id', id)
     if (error) throw new Error(error.message)
   },
 

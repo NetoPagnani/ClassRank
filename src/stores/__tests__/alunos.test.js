@@ -4,13 +4,15 @@ import { createPinia, setActivePinia } from 'pinia'
 const listByTurmaMock = vi.fn()
 const createMock = vi.fn()
 const updateMock = vi.fn()
+const removeMock = vi.fn()
 const uploadAvatarMock = vi.fn()
 
 vi.mock('../../repositories/alunosRepository.js', () => ({
   alunosRepository: {
     listByTurma: (...args) => listByTurmaMock(...args),
     create: (...args) => createMock(...args),
-    update: (...args) => updateMock(...args)
+    update: (...args) => updateMock(...args),
+    remove: (...args) => removeMock(...args)
   }
 }))
 
@@ -28,6 +30,7 @@ describe('useAlunosStore', () => {
     listByTurmaMock.mockReset()
     createMock.mockReset()
     updateMock.mockReset()
+    removeMock.mockReset()
     uploadAvatarMock.mockReset()
   })
 
@@ -130,6 +133,79 @@ describe('useAlunosStore', () => {
 
       expect(store.error).toBe('upload failed')
       expect(updateMock).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('definirFoto', () => {
+    it('updates the repository and the aluno fotoUrl in itemsByTurma', async () => {
+      const aluno = { id: 'a1', turmaId: 't1', nome: 'João', fotoUrl: null }
+      updateMock.mockResolvedValue(undefined)
+      const store = useAlunosStore()
+      store.itemsByTurma['t1'] = [aluno]
+
+      await store.definirFoto('a1', '/assets/avatar-padrao-2.png')
+
+      expect(updateMock).toHaveBeenCalledWith('a1', { fotoUrl: '/assets/avatar-padrao-2.png' })
+      expect(store.itemsByTurma['t1'][0].fotoUrl).toBe('/assets/avatar-padrao-2.png')
+      expect(store.error).toBeNull()
+    })
+
+    it('sets error and does not throw on failure', async () => {
+      updateMock.mockRejectedValue(new Error('update failed'))
+      const store = useAlunosStore()
+
+      await expect(store.definirFoto('a1', '/assets/avatar-padrao-2.png')).resolves.toBeUndefined()
+
+      expect(store.error).toBe('update failed')
+    })
+  })
+
+  describe('renomear', () => {
+    it('updates the repository and the aluno nome in itemsByTurma', async () => {
+      const aluno = { id: 'a1', turmaId: 't1', nome: 'João', fotoUrl: null }
+      updateMock.mockResolvedValue(undefined)
+      const store = useAlunosStore()
+      store.itemsByTurma['t1'] = [aluno]
+
+      await store.renomear('a1', 'João Pedro')
+
+      expect(updateMock).toHaveBeenCalledWith('a1', { nome: 'João Pedro' })
+      expect(store.itemsByTurma['t1'][0].nome).toBe('João Pedro')
+      expect(store.error).toBeNull()
+    })
+
+    it('sets error and does not throw on failure', async () => {
+      updateMock.mockRejectedValue(new Error('update failed'))
+      const store = useAlunosStore()
+
+      await expect(store.renomear('a1', 'João Pedro')).resolves.toBeUndefined()
+
+      expect(store.error).toBe('update failed')
+    })
+  })
+
+  describe('remove', () => {
+    it('removes the aluno from itemsByTurma[turmaId]', async () => {
+      const aluno = { id: 'a1', turmaId: 't1', nome: 'João', fotoUrl: null }
+      removeMock.mockResolvedValue(undefined)
+      const store = useAlunosStore()
+      store.itemsByTurma['t1'] = [aluno]
+
+      await store.remove('a1', 't1')
+
+      expect(removeMock).toHaveBeenCalledWith('a1')
+      expect(store.itemsByTurma['t1']).toEqual([])
+    })
+
+    it('sets error and does not throw on failure', async () => {
+      removeMock.mockRejectedValue(new Error('delete failed'))
+      const store = useAlunosStore()
+      store.itemsByTurma['t1'] = [{ id: 'a1', turmaId: 't1', nome: 'João', fotoUrl: null }]
+
+      await expect(store.remove('a1', 't1')).resolves.toBeUndefined()
+
+      expect(store.error).toBe('delete failed')
+      expect(store.itemsByTurma['t1']).toHaveLength(1)
     })
   })
 })

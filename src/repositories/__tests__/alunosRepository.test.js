@@ -55,6 +55,14 @@ describe('alunosRepository', () => {
     expect(eq).toHaveBeenCalledWith('id', '1')
   })
 
+  it('update translates fotoUrl to the real foto_url column', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: null, error: null })
+    const update = vi.fn(() => ({ eq }))
+    fromMock.mockReturnValueOnce({ update })
+    await expect(alunosRepository.update('1', { fotoUrl: 'https://example.com/a.png' })).resolves.toBeUndefined()
+    expect(update).toHaveBeenCalledWith({ foto_url: 'https://example.com/a.png' })
+  })
+
   it('update throws the Supabase error when the update fails', async () => {
     fromMock.mockReturnValueOnce({
       update: () => ({ eq: () => Promise.resolve({ data: null, error: { message: 'update failed' } }) })

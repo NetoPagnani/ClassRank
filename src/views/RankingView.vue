@@ -6,6 +6,7 @@ import { useAlunosStore } from '../stores/alunos.js'
 import { useTarefasStore } from '../stores/tarefas.js'
 import { useAvaliacoesStore } from '../stores/avaliacoes.js'
 import { useConquistasStore } from '../stores/conquistas.js'
+import { useTurmaMateriasStore } from '../stores/turmaMaterias.js'
 import { useRanking } from '../composables/useRanking.js'
 import { avaliarConquistas } from '../domain/ConquistaEngine.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
@@ -16,9 +17,20 @@ const alunosStore = useAlunosStore()
 const tarefasStore = useTarefasStore()
 const avaliacoesStore = useAvaliacoesStore()
 const conquistasStore = useConquistasStore()
+const turmaMateriasStore = useTurmaMateriasStore()
 
 const turmaId = ref('')
 const materiaId = ref('')
+
+const materiasDaTurma = computed(() => {
+  const ids = turmaMateriasStore.materiaIdsByTurma[turmaId.value] ?? []
+  return materiasStore.items.filter((m) => ids.includes(m.id))
+})
+
+watch(turmaId, async (novoId) => {
+  materiaId.value = ''
+  if (novoId) await turmaMateriasStore.fetchByTurma(novoId)
+})
 
 const novaTarefa = ref({ titulo: '', cmspLink: '', dataEntrega: '', notaMaxima: 10 })
 
@@ -171,13 +183,16 @@ function historicoDoAluno(alunoId) {
         <option value="">Selecione a turma</option>
         <option v-for="turma in turmasStore.items" :key="turma.id" :value="turma.id">{{ turma.nome }}</option>
       </select>
-      <select v-model="materiaId" class="pixel-input pixel-corners px-2 py-1 text-xl">
+      <select v-model="materiaId" class="pixel-input pixel-corners px-2 py-1 text-xl" :disabled="!turmaId">
         <option value="">Selecione a matéria</option>
-        <option v-for="materia in materiasStore.items" :key="materia.id" :value="materia.id">
+        <option v-for="materia in materiasDaTurma" :key="materia.id" :value="materia.id">
           {{ materia.nome }}
         </option>
       </select>
     </div>
+    <p v-if="turmaId && materiasDaTurma.length === 0" class="text-slate-200 text-sm">
+      Essa turma ainda não tem matérias ligadas. Vá em "Turmas" e marque as matérias dela.
+    </p>
 
     <template v-if="turmaId && materiaId">
       <section class="pixel-corners pixel-panel p-4 space-y-3">
