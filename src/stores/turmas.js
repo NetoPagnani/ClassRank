@@ -27,5 +27,16 @@ export const useTurmasStore = defineStore('turmas', () => {
     }
   }
 
-  return { items, selectedId, error, fetchAll, add }
+  async function remove(id) {
+    error.value = null
+    try {
+      await turmasRepository.remove(id)
+      items.value = items.value.filter((turma) => turma.id !== id)
+      if (selectedId.value === id) selectedId.value = null
+    } catch (err) {
+      error.value = err.message
+    }
+  }
+
+  return { items, selectedId, error, fetchAll, add, remove }
 })

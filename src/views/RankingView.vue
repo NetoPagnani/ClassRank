@@ -114,6 +114,27 @@ async function verificarNotaMaxima(alunoId) {
     await conquistasStore.unlock(alunoId, notaMaximaRule.codigo)
   }
 }
+
+// Histórico de tarefas já lançadas por aluno — fica tudo registrado (nenhuma
+// tarefa some do painel ao ser lançada), só expande/recolhe por aluno.
+const historicoAberto = reactive({})
+
+function alternarHistorico(alunoId) {
+  historicoAberto[alunoId] = !historicoAberto[alunoId]
+}
+
+function historicoDoAluno(alunoId) {
+  return tarefas.value.map((tarefa) => {
+    const nota = tarefasStore.notasByTarefa[tarefa.id]?.[alunoId]
+    return {
+      tarefaId: tarefa.id,
+      titulo: tarefa.titulo,
+      notaMaxima: tarefa.notaMaxima,
+      nota: nota?.nota ?? null,
+      entregueEm: nota?.entregueEm ?? null
+    }
+  })
+}
 </script>
 
 <template>
@@ -121,11 +142,11 @@ async function verificarNotaMaxima(alunoId) {
     <h1 class="font-pixel text-rank-gold text-lg">Lançar notas e ranking</h1>
 
     <div class="pixel-corners pixel-panel flex flex-wrap gap-3 p-4">
-      <select v-model="turmaId" class="pixel-input pixel-corners px-2 py-1 font-retro text-lg">
+      <select v-model="turmaId" class="pixel-input pixel-corners px-2 py-1 font-retro text-xl">
         <option value="">Selecione a turma</option>
         <option v-for="turma in turmasStore.items" :key="turma.id" :value="turma.id">{{ turma.nome }}</option>
       </select>
-      <select v-model="materiaId" class="pixel-input pixel-corners px-2 py-1 font-retro text-lg">
+      <select v-model="materiaId" class="pixel-input pixel-corners px-2 py-1 font-retro text-xl">
         <option value="">Selecione a matéria</option>
         <option v-for="materia in materiasStore.items" :key="materia.id" :value="materia.id">
           {{ materia.nome }}
@@ -135,14 +156,14 @@ async function verificarNotaMaxima(alunoId) {
 
     <template v-if="turmaId && materiaId">
       <section class="pixel-corners pixel-panel p-4 space-y-3">
-        <h2 class="font-pixel text-rank-gold text-xs">Tarefas (CMSP)</h2>
+        <h2 class="font-retro text-rank-gold text-2xl uppercase tracking-wide">Tarefas (CMSP)</h2>
         <p v-if="tarefasStore.error" class="text-red-400 text-sm font-retro">{{ tarefasStore.error }}</p>
         <ul class="flex flex-wrap gap-2 text-sm font-retro">
           <li v-for="tarefa in tarefas" :key="tarefa.id" class="pixel-corners bg-rank-navy px-2 py-1">
             {{ tarefa.titulo }} (máx {{ tarefa.notaMaxima }})
           </li>
         </ul>
-        <form class="flex flex-wrap gap-2 items-end font-retro text-lg" @submit.prevent="criarTarefa">
+        <form class="flex flex-wrap gap-2 items-end font-retro text-xl" @submit.prevent="criarTarefa">
           <input
             v-model="novaTarefa.titulo"
             type="text"
@@ -169,12 +190,12 @@ async function verificarNotaMaxima(alunoId) {
       </section>
 
       <section class="pixel-corners pixel-panel p-4 overflow-x-auto">
-        <h2 class="font-pixel text-rank-gold text-xs mb-1">Ranking</h2>
+        <h2 class="font-retro text-rank-gold text-2xl uppercase tracking-wide mb-1">Ranking</h2>
         <p v-if="avaliacoesStore.error" class="text-red-400 text-sm font-retro">{{ avaliacoesStore.error }}</p>
 
         <PodiumTop3 v-if="ranking.length > 0" :linhas="ranking" />
 
-        <table class="min-w-full text-sm font-retro text-lg">
+        <table class="min-w-full text-sm font-retro text-xl">
           <thead>
             <tr class="text-left border-b border-rank-navy text-rank-gold">
               <th class="p-2">#</th>
@@ -184,12 +205,12 @@ async function verificarNotaMaxima(alunoId) {
               <th class="p-2">Prova 2</th>
               <th class="p-2">Participação</th>
               <th class="p-2">Nota final</th>
+              <th class="p-2">Histórico</th>
             </tr>
           </thead>
           <tbody>
+            <template v-for="(linha, index) in ranking" :key="linha.aluno.id">
             <tr
-              v-for="(linha, index) in ranking"
-              :key="linha.aluno.id"
               :class="index < 3 ? 'bg-rank-navy' : ''"
               class="border-b border-rank-navy"
             >
@@ -232,10 +253,37 @@ async function verificarNotaMaxima(alunoId) {
                 />
               </td>
               <td class="p-2 font-pixel text-xs text-rank-gold">{{ linha.notaFinal.toFixed(1) }}</td>
+              <td class="p-2">
+                <button class="pixel-corners pixel-btn px-2 py-1 text-base" @click="alternarHistorico(linha.aluno.id)">
+                  {{ historicoAberto[linha.aluno.id] ? 'Fechar' : 'Ver' }}
+                </button>
+              </td>
             </tr>
+            <tr v-if="historicoAberto[linha.aluno.id]" class="border-b border-rank-navy bg-rank-navyDark">
+              <td :colspan="tarefas.length + 7" class="p-3">
+                <p class="font-retro text-rank-gold text-xl uppercase tracking-wide mb-2">
+                  Histórico de {{ linha.aluno.nome }} — pontuação acumulada no bimestre
+                </p>
+                <ul class="font-retro text-lg space-y-1">
+                  <li v-for="item in historicoDoAluno(linha.aluno.id)" :key="item.tarefaId">
+                    <span v-if="item.nota !== null" class="text-green-400">✔</span>
+                    <span v-else class="text-slate-200">○</span>
+                    {{ item.titulo }} —
+                    <span v-if="item.nota !== null">{{ item.nota }} / {{ item.notaMaxima }}</span>
+                    <span v-else class="text-slate-200">ainda não lançada</span>
+                  </li>
+                  <li v-if="tarefas.length === 0" class="text-slate-200">Nenhuma tarefa cadastrada ainda.</li>
+                </ul>
+                <p class="font-retro text-lg mt-2">
+                  Média das tarefas: <span class="text-rank-gold">{{ linha.mediaTarefas.toFixed(1) }}</span>
+                  — Nota final atual: <span class="text-rank-gold">{{ linha.notaFinal.toFixed(1) }}</span>
+                </p>
+              </td>
+            </tr>
+            </template>
           </tbody>
         </table>
-        <p v-if="alunos.length === 0" class="text-slate-400 text-sm font-retro mt-2">
+        <p v-if="alunos.length === 0" class="text-slate-200 text-sm font-retro mt-2">
           Nenhum aluno nesta turma ainda. Cadastre em "Turmas".
         </p>
       </section>

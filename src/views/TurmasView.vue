@@ -30,6 +30,14 @@ async function criarTurma() {
   novaTurmaNome.value = ''
 }
 
+async function excluirTurma(turma) {
+  const confirmado = window.confirm(
+    `Excluir "${turma.nome}"? Isso apaga também os alunos, tarefas e notas dessa turma. Essa ação não pode ser desfeita.`
+  )
+  if (!confirmado) return
+  await turmasStore.remove(turma.id)
+}
+
 async function criarMateria() {
   if (!novaMateriaNome.value.trim()) return
   await materiasStore.add(novaMateriaNome.value.trim())
@@ -63,9 +71,9 @@ async function copiarLink(slug) {
     <h1 class="font-pixel text-rank-gold text-lg">Turmas</h1>
 
     <section class="pixel-corners pixel-panel p-4 space-y-3">
-      <h2 class="font-pixel text-rank-gold text-xs">Matérias</h2>
+      <h2 class="font-retro text-rank-gold text-2xl uppercase tracking-wide">Matérias</h2>
       <p v-if="materiasStore.error" class="text-red-400 text-sm font-retro">{{ materiasStore.error }}</p>
-      <ul class="flex flex-wrap gap-2 font-retro text-lg">
+      <ul class="flex flex-wrap gap-2 font-retro text-xl">
         <li
           v-for="materia in materiasStore.items"
           :key="materia.id"
@@ -74,7 +82,7 @@ async function copiarLink(slug) {
           {{ materia.nome }}
         </li>
       </ul>
-      <form class="flex gap-2 font-retro text-lg" @submit.prevent="criarMateria">
+      <form class="flex gap-2 font-retro text-xl" @submit.prevent="criarMateria">
         <input
           v-model="novaMateriaNome"
           type="text"
@@ -86,9 +94,9 @@ async function copiarLink(slug) {
     </section>
 
     <section class="pixel-corners pixel-panel p-4 space-y-3">
-      <h2 class="font-pixel text-rank-gold text-xs">Suas turmas</h2>
+      <h2 class="font-retro text-rank-gold text-2xl uppercase tracking-wide">Suas turmas</h2>
       <p v-if="turmasStore.error" class="text-red-400 text-sm font-retro">{{ turmasStore.error }}</p>
-      <ul class="space-y-2 font-retro text-lg">
+      <ul class="space-y-2 font-retro text-xl">
         <li
           v-for="turma in turmasStore.items"
           :key="turma.id"
@@ -96,13 +104,19 @@ async function copiarLink(slug) {
           :class="{ 'border-rank-gold bg-rank-navy': turma.id === turmaSelecionadaId }"
         >
           <button class="text-rank-gold underline" @click="selecionarTurma(turma.id)">{{ turma.nome }}</button>
-          <span class="text-sm text-slate-400 break-all">{{ linkPublico(turma.slug) }}</span>
-          <button class="pixel-corners pixel-btn text-[0.55rem] px-2 py-1" @click="copiarLink(turma.slug)">
+          <span class="text-sm text-slate-200 break-all">{{ linkPublico(turma.slug) }}</span>
+          <button class="pixel-corners pixel-btn px-2 py-1 text-base" @click="copiarLink(turma.slug)">
             Copiar link público
+          </button>
+          <button
+            class="pixel-corners px-2 py-1 text-base font-retro bg-red-900 border-2 border-black text-red-100 shadow-[2px_2px_0_0_rgba(0,0,0,0.45)]"
+            @click="excluirTurma(turma)"
+          >
+            Excluir
           </button>
         </li>
       </ul>
-      <form class="flex gap-2 font-retro text-lg" @submit.prevent="criarTurma">
+      <form class="flex gap-2 font-retro text-xl" @submit.prevent="criarTurma">
         <input
           v-model="novaTurmaNome"
           type="text"
@@ -114,9 +128,9 @@ async function copiarLink(slug) {
     </section>
 
     <section v-if="turmaSelecionadaId" class="pixel-corners pixel-panel p-4 space-y-3">
-      <h2 class="font-pixel text-rank-gold text-xs">Alunos</h2>
+      <h2 class="font-retro text-rank-gold text-2xl uppercase tracking-wide">Alunos</h2>
       <p v-if="alunosStore.error" class="text-red-400 text-sm font-retro">{{ alunosStore.error }}</p>
-      <ul class="space-y-2 font-retro text-lg">
+      <ul class="space-y-2 font-retro text-xl">
         <li
           v-for="aluno in alunosDaTurma"
           :key="aluno.id"
@@ -126,11 +140,11 @@ async function copiarLink(slug) {
             v-if="aluno.fotoUrl"
             :src="aluno.fotoUrl"
             :alt="aluno.nome"
-            class="w-10 h-10 rounded-full object-cover border-2 border-rank-gold"
+            class="pixel-corners w-10 h-10 object-cover border-2 border-rank-gold shadow-[2px_2px_0_0_rgba(0,0,0,0.45)]"
           />
           <div
             v-else
-            class="w-10 h-10 rounded-full bg-rank-navy border-2 border-rank-gold flex items-center justify-center font-pixel text-xs"
+            class="pixel-corners w-10 h-10 bg-rank-navy border-2 border-rank-gold flex items-center justify-center font-pixel text-xs shadow-[2px_2px_0_0_rgba(0,0,0,0.45)]"
           >
             {{ aluno.nome.charAt(0) }}
           </div>
@@ -138,7 +152,7 @@ async function copiarLink(slug) {
           <input type="file" accept="image/*" class="text-sm" @change="trocarFoto(aluno.id, $event)" />
         </li>
       </ul>
-      <form class="flex gap-2 font-retro text-lg" @submit.prevent="criarAluno">
+      <form class="flex gap-2 font-retro text-xl" @submit.prevent="criarAluno">
         <input
           v-model="novoAlunoNome"
           type="text"

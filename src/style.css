@@ -25,9 +25,10 @@ body {
 }
 
 .pixel-btn {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.65rem;
+  font-family: 'VT323', monospace;
+  font-size: 1.15rem;
   letter-spacing: 0.02em;
+  text-transform: uppercase;
   background: #f5b942;
   color: #16243d;
   border: 3px solid #0a1220;

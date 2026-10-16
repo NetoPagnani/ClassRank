@@ -30,11 +30,11 @@ function alternarModo() {
 
 <template>
   <div class="max-w-sm mx-auto mt-16 pixel-corners pixel-panel p-6 space-y-4">
-    <p class="font-pixel text-rank-gold text-[0.6rem] text-center">🏆 CLASSRANK</p>
+    <p class="font-pixel text-rank-gold text-xs text-center">🏆 CLASSRANK</p>
     <h1 class="font-pixel text-base text-white text-center">
       {{ modo === 'entrar' ? 'Entrar' : 'Criar conta de professor' }}
     </h1>
-    <form class="space-y-3 font-retro text-lg" @submit.prevent="handleSubmit">
+    <form class="space-y-3 font-retro text-xl" @submit.prevent="handleSubmit">
       <div>
         <label for="email" class="block text-sm font-pixel text-rank-gold mb-1">E-mail institucional</label>
         <input
