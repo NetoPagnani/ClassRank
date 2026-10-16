@@ -52,4 +52,20 @@ describe('avaliacoesRepository', () => {
       avaliacoesRepository.upsert({ alunoId: 'a1', materiaId: 'm1', prova1: 7, prova2: null, participacao: null })
     ).rejects.toThrow('upsert failed')
   })
+
+  it('listByAluno resolves every avaliacao for the given aluno across materias', async () => {
+    const rows = [{ materia_id: 'm1', prova1: 7, prova2: 8, participacao: 9 }]
+    const eq = vi.fn().mockResolvedValue({ data: rows, error: null })
+    const select = vi.fn(() => ({ eq }))
+    fromMock.mockReturnValueOnce({ select })
+    await expect(avaliacoesRepository.listByAluno('a1')).resolves.toEqual(rows)
+    expect(fromMock).toHaveBeenCalledWith('avaliacoes')
+    expect(eq).toHaveBeenCalledWith('aluno_id', 'a1')
+  })
+
+  it('listByAluno throws the Supabase error when the query fails', async () => {
+    const eq = vi.fn().mockResolvedValue({ data: null, error: { message: 'list failed' } })
+    fromMock.mockReturnValueOnce({ select: () => ({ eq }) })
+    await expect(avaliacoesRepository.listByAluno('a1')).rejects.toThrow('list failed')
+  })
 })

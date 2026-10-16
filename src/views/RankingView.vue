@@ -7,7 +7,7 @@ import { useTarefasStore } from '../stores/tarefas.js'
 import { useAvaliacoesStore } from '../stores/avaliacoes.js'
 import { useConquistasStore } from '../stores/conquistas.js'
 import { useRanking } from '../composables/useRanking.js'
-import { notaMaximaRule } from '../domain/conquistaRules/notaMaximaRule.js'
+import { avaliarConquistas } from '../domain/ConquistaEngine.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
 
 const turmasStore = useTurmasStore()
@@ -94,6 +94,7 @@ function notaDaTarefa(tarefaId, alunoId) {
 async function salvarNota(tarefaId, alunoId, valor) {
   if (valor === '' || valor === null) return
   await tarefasStore.saveNota(alunoId, tarefaId, Number(valor), new Date().toISOString())
+  await verificarConquistas(alunoId)
 }
 
 async function salvarAvaliacao(alunoId) {
@@ -105,13 +106,37 @@ async function salvarAvaliacao(alunoId) {
     prova2: draft.prova2,
     participacao: draft.participacao
   })
-  await verificarNotaMaxima(alunoId)
+  await verificarConquistas(alunoId)
 }
 
-async function verificarNotaMaxima(alunoId) {
+// Monta o contexto do aluno e roda as 3 regras de conquista (Strategy):
+// pontual (entregou tudo no prazo), nota_maxima (nota final >= 9) e
+// presença exemplar (participação >= 9 em TODAS as matérias já avaliadas).
+async function verificarConquistas(alunoId) {
   const linha = ranking.value.find((l) => l.aluno.id === alunoId)
-  if (linha && notaMaximaRule.avaliar({ notaFinal: linha.notaFinal })) {
-    await conquistasStore.unlock(alunoId, notaMaximaRule.codigo)
+  if (!linha) return
+
+  const tarefasEntregues = tarefas.value
+    .map((tarefa) => {
+      const nota = tarefasStore.notasByTarefa[tarefa.id]?.[alunoId]
+      if (!nota?.entregueEm) return null
+      return { dataEntrega: new Date(nota.entregueEm), prazo: new Date(tarefa.dataEntrega) }
+    })
+    .filter(Boolean)
+
+  const avaliacoesDoAluno = await avaliacoesStore.listByAluno(alunoId)
+  const participacaoPorMateria = avaliacoesDoAluno
+    .map((av) => av.participacao)
+    .filter((p) => p !== null && p !== undefined)
+
+  const codigosDesbloqueados = avaliarConquistas({
+    tarefasEntregues,
+    notaFinal: linha.notaFinal,
+    participacaoPorMateria
+  })
+
+  for (const codigo of codigosDesbloqueados) {
+    await conquistasStore.unlock(alunoId, codigo)
   }
 }
 
@@ -142,11 +167,11 @@ function historicoDoAluno(alunoId) {
     <h1 class="font-pixel text-rank-gold text-lg">Lançar notas e ranking</h1>
 
     <div class="pixel-corners pixel-panel flex flex-wrap gap-3 p-4">
-      <select v-model="turmaId" class="pixel-input pixel-corners px-2 py-1 font-retro text-xl">
+      <select v-model="turmaId" class="pixel-input pixel-corners px-2 py-1 text-xl">
         <option value="">Selecione a turma</option>
         <option v-for="turma in turmasStore.items" :key="turma.id" :value="turma.id">{{ turma.nome }}</option>
       </select>
-      <select v-model="materiaId" class="pixel-input pixel-corners px-2 py-1 font-retro text-xl">
+      <select v-model="materiaId" class="pixel-input pixel-corners px-2 py-1 text-xl">
         <option value="">Selecione a matéria</option>
         <option v-for="materia in materiasStore.items" :key="materia.id" :value="materia.id">
           {{ materia.nome }}
@@ -156,14 +181,14 @@ function historicoDoAluno(alunoId) {
 
     <template v-if="turmaId && materiaId">
       <section class="pixel-corners pixel-panel p-4 space-y-3">
-        <h2 class="font-retro text-rank-gold text-2xl uppercase tracking-wide">Tarefas (CMSP)</h2>
-        <p v-if="tarefasStore.error" class="text-red-400 text-sm font-retro">{{ tarefasStore.error }}</p>
-        <ul class="flex flex-wrap gap-2 text-sm font-retro">
+        <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide">Tarefas (CMSP)</h2>
+        <p v-if="tarefasStore.error" class="text-red-400 text-sm">{{ tarefasStore.error }}</p>
+        <ul class="flex flex-wrap gap-2 text-sm">
           <li v-for="tarefa in tarefas" :key="tarefa.id" class="pixel-corners bg-rank-navy px-2 py-1">
             {{ tarefa.titulo }} (máx {{ tarefa.notaMaxima }})
           </li>
         </ul>
-        <form class="flex flex-wrap gap-2 items-end font-retro text-xl" @submit.prevent="criarTarefa">
+        <form class="flex flex-wrap gap-2 items-end text-xl" @submit.prevent="criarTarefa">
           <input
             v-model="novaTarefa.titulo"
             type="text"
@@ -190,12 +215,12 @@ function historicoDoAluno(alunoId) {
       </section>
 
       <section class="pixel-corners pixel-panel p-4 overflow-x-auto">
-        <h2 class="font-retro text-rank-gold text-2xl uppercase tracking-wide mb-1">Ranking</h2>
-        <p v-if="avaliacoesStore.error" class="text-red-400 text-sm font-retro">{{ avaliacoesStore.error }}</p>
+        <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-1">Ranking</h2>
+        <p v-if="avaliacoesStore.error" class="text-red-400 text-sm">{{ avaliacoesStore.error }}</p>
 
         <PodiumTop3 v-if="ranking.length > 0" :linhas="ranking" />
 
-        <table class="min-w-full text-sm font-retro text-xl">
+        <table class="min-w-full text-sm text-xl">
           <thead>
             <tr class="text-left border-b border-rank-navy text-rank-gold">
               <th class="p-2">#</th>
@@ -261,10 +286,10 @@ function historicoDoAluno(alunoId) {
             </tr>
             <tr v-if="historicoAberto[linha.aluno.id]" class="border-b border-rank-navy bg-rank-navyDark">
               <td :colspan="tarefas.length + 7" class="p-3">
-                <p class="font-retro text-rank-gold text-xl uppercase tracking-wide mb-2">
+                <p class="text-rank-gold text-xl uppercase tracking-wide mb-2">
                   Histórico de {{ linha.aluno.nome }} — pontuação acumulada no bimestre
                 </p>
-                <ul class="font-retro text-lg space-y-1">
+                <ul class="text-lg space-y-1">
                   <li v-for="item in historicoDoAluno(linha.aluno.id)" :key="item.tarefaId">
                     <span v-if="item.nota !== null" class="text-green-400">✔</span>
                     <span v-else class="text-slate-200">○</span>
@@ -274,7 +299,7 @@ function historicoDoAluno(alunoId) {
                   </li>
                   <li v-if="tarefas.length === 0" class="text-slate-200">Nenhuma tarefa cadastrada ainda.</li>
                 </ul>
-                <p class="font-retro text-lg mt-2">
+                <p class="text-lg mt-2">
                   Média das tarefas: <span class="text-rank-gold">{{ linha.mediaTarefas.toFixed(1) }}</span>
                   — Nota final atual: <span class="text-rank-gold">{{ linha.notaFinal.toFixed(1) }}</span>
                 </p>
@@ -283,7 +308,7 @@ function historicoDoAluno(alunoId) {
             </template>
           </tbody>
         </table>
-        <p v-if="alunos.length === 0" class="text-slate-200 text-sm font-retro mt-2">
+        <p v-if="alunos.length === 0" class="text-slate-200 text-sm mt-2">
           Nenhum aluno nesta turma ainda. Cadastre em "Turmas".
         </p>
       </section>

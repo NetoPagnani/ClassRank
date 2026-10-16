@@ -27,7 +27,7 @@ const COROAS = { 0: '👑', 1: '🥈', 2: '🥉' }
           />
           <span v-else>{{ linhas[posicao].aluno.nome.charAt(0) }}</span>
         </div>
-        <span class="font-retro text-base text-center leading-tight truncate w-full">{{
+        <span class="text-base text-center leading-tight truncate w-full">{{
           linhas[posicao].aluno.nome
         }}</span>
         <span class="font-pixel text-sm text-rank-gold">{{ linhas[posicao].notaFinal.toFixed(1) }}</span>

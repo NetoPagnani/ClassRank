@@ -30,13 +30,13 @@ function alternarModo() {
 
 <template>
   <div class="max-w-sm mx-auto mt-16 pixel-corners pixel-panel p-6 space-y-4">
-    <p class="font-pixel text-rank-gold text-xs text-center">🏆 CLASSRANK</p>
-    <h1 class="font-pixel text-base text-white text-center">
+    <p class="font-pixel text-rank-gold text-xs text-center">🏆 EDUQUEST</p>
+    <h1 class="text-xl font-bold text-white text-center">
       {{ modo === 'entrar' ? 'Entrar' : 'Criar conta de professor' }}
     </h1>
-    <form class="space-y-3 font-retro text-xl" @submit.prevent="handleSubmit">
+    <form class="space-y-3 text-xl" @submit.prevent="handleSubmit">
       <div>
-        <label for="email" class="block text-sm font-pixel text-rank-gold mb-1">E-mail institucional</label>
+        <label for="email" class="block text-sm font-bold text-rank-gold mb-1">E-mail institucional</label>
         <input
           id="email"
           v-model="email"
@@ -48,7 +48,7 @@ function alternarModo() {
         />
       </div>
       <div>
-        <label for="password" class="block text-sm font-pixel text-rank-gold mb-1">Senha</label>
+        <label for="password" class="block text-sm font-bold text-rank-gold mb-1">Senha</label>
         <input
           id="password"
           v-model="password"
@@ -63,9 +63,9 @@ function alternarModo() {
         {{ modo === 'entrar' ? 'Entrar' : 'Criar conta' }}
       </button>
     </form>
-    <p v-if="authStore.error" class="text-red-400 text-sm font-retro">{{ authStore.error }}</p>
-    <p v-if="authStore.message" class="text-green-400 text-sm font-retro">{{ authStore.message }}</p>
-    <button class="text-sm text-rank-gold underline font-retro" @click="alternarModo">
+    <p v-if="authStore.error" class="text-red-400 text-sm">{{ authStore.error }}</p>
+    <p v-if="authStore.message" class="text-green-400 text-sm">{{ authStore.message }}</p>
+    <button class="text-sm text-rank-gold underline" @click="alternarModo">
       {{ modo === 'entrar' ? 'Ainda não tem conta? Criar conta' : 'Já tem conta? Entrar' }}
     </button>
   </div>

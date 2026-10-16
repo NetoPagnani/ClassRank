@@ -47,22 +47,22 @@ const linhasPodio = computed(() =>
 
 <template>
   <div class="space-y-6">
-    <p v-if="!turma" class="font-retro text-xl text-slate-100">Turma não encontrada.</p>
+    <p v-if="!turma" class="text-xl text-slate-100">Turma não encontrada.</p>
     <template v-else>
       <div class="text-center space-y-1">
         <p class="font-pixel text-rank-gold text-xs">🏆 RANKING DA TURMA</p>
         <h1 class="font-pixel text-xl text-white">{{ turma.nome }}</h1>
       </div>
-      <p v-if="error" class="text-red-400 text-sm font-retro">{{ error }}</p>
+      <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
 
       <div v-if="missao" class="pixel-corners pixel-panel p-4">
-        <h2 class="font-retro text-rank-gold text-2xl uppercase tracking-wide mb-2">Missão da semana: {{ missao.titulo }}</h2>
-        <p class="text-base font-retro text-slate-100">{{ missao.descricao }}</p>
-        <p class="text-base font-retro">Progresso: {{ missao.progresso_atual }} / {{ missao.meta }}</p>
+        <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-2">Missão da semana: {{ missao.titulo }}</h2>
+        <p class="text-base text-slate-100">{{ missao.descricao }}</p>
+        <p class="text-base">Progresso: {{ missao.progresso_atual }} / {{ missao.meta }}</p>
       </div>
 
       <section class="pixel-corners pixel-panel p-4 space-y-3">
-        <select v-model="materiaId" class="pixel-input pixel-corners px-2 py-1 font-retro text-xl">
+        <select v-model="materiaId" class="pixel-input pixel-corners px-2 py-1 text-xl">
           <option value="">Selecione a matéria</option>
           <option v-for="materia in materias" :key="materia.id" :value="materia.id">{{ materia.nome }}</option>
         </select>
@@ -70,7 +70,7 @@ const linhasPodio = computed(() =>
         <template v-if="materiaId">
           <PodiumTop3 v-if="linhasPodio.length > 0" :linhas="linhasPodio" />
 
-          <table class="min-w-full text-sm font-retro text-xl">
+          <table class="min-w-full text-sm text-xl">
             <thead>
               <tr class="text-left border-b border-rank-navy text-rank-gold">
                 <th class="p-2">#</th>
@@ -96,14 +96,14 @@ const linhasPodio = computed(() =>
             </tbody>
           </table>
         </template>
-        <p v-if="materias.length === 0" class="text-slate-200 text-sm font-retro">
+        <p v-if="materias.length === 0" class="text-slate-200 text-sm">
           Nenhuma matéria com tarefas ainda.
         </p>
       </section>
 
       <section v-if="conquistas.length > 0" class="pixel-corners pixel-panel p-4">
-        <h2 class="font-retro text-rank-gold text-2xl uppercase tracking-wide mb-2">Conquistas da turma</h2>
-        <ul class="text-base font-retro space-y-1">
+        <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-2">Conquistas da turma</h2>
+        <ul class="text-base space-y-1">
           <li v-for="(c, i) in conquistas" :key="i">🏅 {{ c.aluno_nome }} — {{ c.conquista_nome }}</li>
         </ul>
       </section>

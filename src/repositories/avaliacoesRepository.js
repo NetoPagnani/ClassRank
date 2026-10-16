@@ -18,5 +18,14 @@ export const avaliacoesRepository = {
       { onConflict: 'aluno_id,materia_id' }
     )
     if (error) throw new Error(error.message)
+  },
+
+  async listByAluno(alunoId) {
+    const { data, error } = await supabase
+      .from('avaliacoes')
+      .select('materia_id, prova1, prova2, participacao')
+      .eq('aluno_id', alunoId)
+    if (error) throw new Error(error.message)
+    return data
   }
 }

@@ -39,5 +39,15 @@ export const useAvaliacoesStore = defineStore('avaliacoes', () => {
     }
   }
 
-  return { itemsByAlunoMateria, error, fetchByAlunoMateria, upsert }
+  async function listByAluno(alunoId) {
+    error.value = null
+    try {
+      return await avaliacoesRepository.listByAluno(alunoId)
+    } catch (err) {
+      error.value = err.message
+      return []
+    }
+  }
+
+  return { itemsByAlunoMateria, error, fetchByAlunoMateria, upsert, listByAluno }
 })

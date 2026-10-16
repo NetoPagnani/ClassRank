@@ -21,8 +21,8 @@ async function handleLogout() {
       v-if="showNav"
       class="bg-rank-navyDark border-b-4 border-black px-4 py-3 flex items-center gap-6 flex-wrap"
     >
-      <strong class="font-pixel text-rank-gold text-sm">ClassRank</strong>
-      <nav class="flex gap-5 flex-1 flex-wrap font-retro text-lg">
+      <strong class="font-pixel text-rank-gold text-sm">EduQuest</strong>
+      <nav class="flex gap-5 flex-1 flex-wrap text-lg">
         <RouterLink
           class="text-slate-200 hover:text-rank-gold transition-colors"
           active-class="text-rank-gold border-b-2 border-rank-gold"

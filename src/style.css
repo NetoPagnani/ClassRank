@@ -25,8 +25,8 @@ body {
 }
 
 .pixel-btn {
-  font-family: 'VT323', monospace;
-  font-size: 1.15rem;
+  font-weight: 700;
+  font-size: 0.95rem;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   background: #f5b942;
