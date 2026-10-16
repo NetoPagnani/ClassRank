@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useTurmasStore } from '../stores/turmas.js'
 import { useAlunosStore } from '../stores/alunos.js'
 import { useConquistasStore } from '../stores/conquistas.js'
+import bau from '../assets/bau.png'
 
 const turmasStore = useTurmasStore()
 const alunosStore = useAlunosStore()
@@ -35,9 +36,16 @@ watch(alunoId, async () => {
     <section class="pixel-corners pixel-panel p-4">
       <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-3">Catálogo</h2>
       <ul class="grid sm:grid-cols-3 gap-3 text-xl">
-        <li v-for="c in conquistasStore.catalogo" :key="c.id" class="pixel-corners border-2 border-rank-navy p-3">
-          <strong class="text-rank-gold">🏅 {{ c.nome }}</strong>
-          <p class="text-slate-100 text-base">{{ c.descricao }}</p>
+        <li
+          v-for="c in conquistasStore.catalogo"
+          :key="c.id"
+          class="pixel-corners border-2 border-rank-navy p-3 flex items-start gap-3"
+        >
+          <img :src="bau" alt="" class="w-10 h-10 shrink-0" />
+          <div>
+            <strong class="text-rank-gold">{{ c.nome }}</strong>
+            <p class="text-slate-100 text-base">{{ c.descricao }}</p>
+          </div>
         </li>
       </ul>
     </section>
@@ -54,9 +62,11 @@ watch(alunoId, async () => {
           <option v-for="aluno in alunos" :key="aluno.id" :value="aluno.id">{{ aluno.nome }}</option>
         </select>
       </div>
-      <ul v-if="alunoId" class="text-xl space-y-1">
+      <ul v-if="alunoId" class="text-xl space-y-2">
         <li v-if="conquistasDoAluno.length === 0" class="text-slate-200">Nenhuma conquista ainda.</li>
-        <li v-for="item in conquistasDoAluno" :key="item.conquista_id">🏅 {{ item.conquistas?.nome }}</li>
+        <li v-for="item in conquistasDoAluno" :key="item.conquista_id" class="flex items-center gap-2">
+          <img :src="bau" alt="" class="w-6 h-6" /> {{ item.conquistas?.nome }}
+        </li>
       </ul>
     </section>
   </div>

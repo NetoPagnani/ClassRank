@@ -3,6 +3,9 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { publicRepository } from '../repositories/publicRepository.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
+import { avatarPadrao } from '../utils/avatarPadrao.js'
+import logo from '../assets/logo.png'
+import bau from '../assets/bau.png'
 
 const route = useRoute()
 const slug = route.params.slug
@@ -39,7 +42,7 @@ watch(materiaId, async () => {
 
 const linhasPodio = computed(() =>
   ranking.value.map((linha) => ({
-    aluno: { nome: linha.nome, fotoUrl: linha.foto_url },
+    aluno: { id: linha.aluno_id, nome: linha.nome, fotoUrl: linha.foto_url },
     notaFinal: Number(linha.nota_final)
   }))
 )
@@ -49,8 +52,9 @@ const linhasPodio = computed(() =>
   <div class="space-y-6">
     <p v-if="!turma" class="text-xl text-slate-100">Turma não encontrada.</p>
     <template v-else>
-      <div class="text-center space-y-1">
-        <p class="font-pixel text-rank-gold text-xs">🏆 RANKING DA TURMA</p>
+      <div class="text-center space-y-2">
+        <img :src="logo" alt="EduQuest" class="w-16 h-16 mx-auto pixel-corners" />
+        <p class="font-pixel text-rank-gold text-xs">RANKING DA TURMA</p>
         <h1 class="font-pixel text-xl text-white">{{ turma.nome }}</h1>
       </div>
       <p v-if="error" class="text-red-400 text-sm">{{ error }}</p>
@@ -88,7 +92,10 @@ const linhasPodio = computed(() =>
               >
                 <td class="p-2">{{ index + 1 }}º {{ index < 3 ? '🏆' : '' }}</td>
                 <td class="p-2">
-                  <img v-if="linha.foto_url" :src="linha.foto_url" class="w-8 h-8 rounded-full object-cover" />
+                  <img
+                    :src="linha.foto_url || avatarPadrao(linha.aluno_id)"
+                    class="pixel-corners w-8 h-8 object-cover border-2 border-rank-gold"
+                  />
                 </td>
                 <td class="p-2">{{ linha.nome }}</td>
                 <td class="p-2 font-pixel text-xs text-rank-gold">{{ Number(linha.nota_final).toFixed(1) }}</td>
@@ -103,8 +110,10 @@ const linhasPodio = computed(() =>
 
       <section v-if="conquistas.length > 0" class="pixel-corners pixel-panel p-4">
         <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-2">Conquistas da turma</h2>
-        <ul class="text-base space-y-1">
-          <li v-for="(c, i) in conquistas" :key="i">🏅 {{ c.aluno_nome }} — {{ c.conquista_nome }}</li>
+        <ul class="text-base space-y-2">
+          <li v-for="(c, i) in conquistas" :key="i" class="flex items-center gap-2">
+            <img :src="bau" alt="" class="w-6 h-6" /> {{ c.aluno_nome }} — {{ c.conquista_nome }}
+          </li>
         </ul>
       </section>
     </template>

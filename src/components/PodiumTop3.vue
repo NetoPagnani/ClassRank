@@ -1,4 +1,6 @@
 <script setup>
+import { avatarPadrao } from '../utils/avatarPadrao.js'
+
 defineProps({
   linhas: { type: Array, required: true } // [{ aluno: {nome, fotoUrl}, notaFinal }], já ordenado desc
 })
@@ -20,12 +22,10 @@ const COROAS = { 0: '👑', 1: '🥈', 2: '🥉' }
           :class="BORDAS[posicao]"
         >
           <img
-            v-if="linhas[posicao].aluno.fotoUrl"
-            :src="linhas[posicao].aluno.fotoUrl"
+            :src="linhas[posicao].aluno.fotoUrl || avatarPadrao(linhas[posicao].aluno.id)"
             :alt="linhas[posicao].aluno.nome"
             class="w-full h-full object-cover"
           />
-          <span v-else>{{ linhas[posicao].aluno.nome.charAt(0) }}</span>
         </div>
         <span class="text-base text-center leading-tight truncate w-full">{{
           linhas[posicao].aluno.nome

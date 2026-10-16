@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter, RouterLink, RouterView } from 'vue-router'
 import { useAuthStore } from './stores/auth.js'
+import logo from './assets/logo.png'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -21,7 +22,10 @@ async function handleLogout() {
       v-if="showNav"
       class="bg-rank-navyDark border-b-4 border-black px-4 py-3 flex items-center gap-6 flex-wrap"
     >
-      <strong class="font-pixel text-rank-gold text-sm">EduQuest</strong>
+      <div class="flex items-center gap-2">
+        <img :src="logo" alt="" class="w-9 h-9 pixel-corners" />
+        <strong class="font-pixel text-rank-gold text-sm">EduQuest</strong>
+      </div>
       <nav class="flex gap-5 flex-1 flex-wrap text-lg">
         <RouterLink
           class="text-slate-200 hover:text-rank-gold transition-colors"

@@ -4,6 +4,7 @@ import { useTurmasStore } from '../stores/turmas.js'
 import { useMateriasStore } from '../stores/materias.js'
 import { useAlunosStore } from '../stores/alunos.js'
 import { useMissoesStore } from '../stores/missoes.js'
+import { avatarPadrao } from '../utils/avatarPadrao.js'
 
 const turmasStore = useTurmasStore()
 const materiasStore = useMateriasStore()
@@ -186,17 +187,10 @@ async function copiarLink(slug) {
           class="pixel-corners border-2 border-rank-navy p-2 flex items-center gap-3"
         >
           <img
-            v-if="aluno.fotoUrl"
-            :src="aluno.fotoUrl"
+            :src="aluno.fotoUrl || avatarPadrao(aluno.id)"
             :alt="aluno.nome"
             class="pixel-corners w-10 h-10 object-cover border-2 border-rank-gold shadow-[2px_2px_0_0_rgba(0,0,0,0.45)]"
           />
-          <div
-            v-else
-            class="pixel-corners w-10 h-10 bg-rank-navy border-2 border-rank-gold flex items-center justify-center font-pixel text-xs shadow-[2px_2px_0_0_rgba(0,0,0,0.45)]"
-          >
-            {{ aluno.nome.charAt(0) }}
-          </div>
           <span class="flex-1">{{ aluno.nome }}</span>
           <input type="file" accept="image/*" class="text-sm" @change="trocarFoto(aluno.id, $event)" />
         </li>

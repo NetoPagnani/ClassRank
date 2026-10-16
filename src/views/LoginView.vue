@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
+import logo from '../assets/logo.png'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -30,7 +31,10 @@ function alternarModo() {
 
 <template>
   <div class="max-w-sm mx-auto mt-16 pixel-corners pixel-panel p-6 space-y-4">
-    <p class="font-pixel text-rank-gold text-xs text-center">🏆 EDUQUEST</p>
+    <div class="flex flex-col items-center gap-2">
+      <img :src="logo" alt="EduQuest" class="w-20 h-20 pixel-corners" />
+      <p class="font-pixel text-rank-gold text-xs text-center">EDUQUEST</p>
+    </div>
     <h1 class="text-xl font-bold text-white text-center">
       {{ modo === 'entrar' ? 'Entrar' : 'Criar conta de professor' }}
     </h1>
