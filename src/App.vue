@@ -16,17 +16,50 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-100">
-    <header v-if="showNav" class="bg-slate-800 text-white px-4 py-3 flex items-center gap-4 flex-wrap">
-      <strong class="text-lg">ClassRank</strong>
-      <nav class="flex gap-3 flex-1 flex-wrap">
-        <RouterLink class="hover:underline" :to="{ name: 'home' }">Início</RouterLink>
-        <RouterLink class="hover:underline" :to="{ name: 'ranking' }">Ranking</RouterLink>
-        <RouterLink class="hover:underline" :to="{ name: 'turmas' }">Turmas</RouterLink>
-        <RouterLink class="hover:underline" :to="{ name: 'conquistas' }">Conquistas</RouterLink>
-        <RouterLink class="hover:underline" :to="{ name: 'sobre' }">Sobre</RouterLink>
+  <div class="min-h-screen">
+    <header
+      v-if="showNav"
+      class="bg-rank-navyDark border-b-4 border-black px-4 py-3 flex items-center gap-6 flex-wrap"
+    >
+      <strong class="font-pixel text-rank-gold text-sm">ClassRank</strong>
+      <nav class="flex gap-5 flex-1 flex-wrap font-retro text-lg">
+        <RouterLink
+          class="text-slate-200 hover:text-rank-gold transition-colors"
+          active-class="text-rank-gold border-b-2 border-rank-gold"
+          :to="{ name: 'home' }"
+        >
+          Início
+        </RouterLink>
+        <RouterLink
+          class="text-slate-200 hover:text-rank-gold transition-colors"
+          active-class="text-rank-gold border-b-2 border-rank-gold"
+          :to="{ name: 'ranking' }"
+        >
+          Ranking
+        </RouterLink>
+        <RouterLink
+          class="text-slate-200 hover:text-rank-gold transition-colors"
+          active-class="text-rank-gold border-b-2 border-rank-gold"
+          :to="{ name: 'turmas' }"
+        >
+          Turmas
+        </RouterLink>
+        <RouterLink
+          class="text-slate-200 hover:text-rank-gold transition-colors"
+          active-class="text-rank-gold border-b-2 border-rank-gold"
+          :to="{ name: 'conquistas' }"
+        >
+          Conquistas
+        </RouterLink>
+        <RouterLink
+          class="text-slate-200 hover:text-rank-gold transition-colors"
+          active-class="text-rank-gold border-b-2 border-rank-gold"
+          :to="{ name: 'sobre' }"
+        >
+          Sobre
+        </RouterLink>
       </nav>
-      <button class="bg-slate-600 hover:bg-slate-500 px-3 py-1 rounded" @click="handleLogout">Sair</button>
+      <button class="pixel-corners pixel-btn px-3 py-2" @click="handleLogout">Sair</button>
     </header>
     <main class="p-4 max-w-5xl mx-auto">
       <RouterView />

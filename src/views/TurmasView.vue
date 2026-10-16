@@ -60,85 +60,92 @@ async function copiarLink(slug) {
 
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold">Turmas</h1>
+    <h1 class="font-pixel text-rank-gold text-lg">Turmas</h1>
 
-    <section class="bg-white rounded-lg shadow p-4 space-y-3">
-      <h2 class="font-semibold text-lg">Matérias</h2>
-      <p v-if="materiasStore.error" class="text-red-600 text-sm">{{ materiasStore.error }}</p>
-      <ul class="flex flex-wrap gap-2">
+    <section class="pixel-corners pixel-panel p-4 space-y-3">
+      <h2 class="font-pixel text-rank-gold text-xs">Matérias</h2>
+      <p v-if="materiasStore.error" class="text-red-400 text-sm font-retro">{{ materiasStore.error }}</p>
+      <ul class="flex flex-wrap gap-2 font-retro text-lg">
         <li
           v-for="materia in materiasStore.items"
           :key="materia.id"
-          class="bg-slate-100 rounded px-3 py-1 text-sm"
+          class="pixel-corners bg-rank-navy px-3 py-1"
         >
           {{ materia.nome }}
         </li>
       </ul>
-      <form class="flex gap-2" @submit.prevent="criarMateria">
+      <form class="flex gap-2 font-retro text-lg" @submit.prevent="criarMateria">
         <input
           v-model="novaMateriaNome"
           type="text"
           placeholder="Nova matéria (ex: Matemática)"
-          class="border rounded px-2 py-1 flex-1"
+          class="pixel-input pixel-corners px-2 py-1 flex-1"
         />
-        <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Adicionar</button>
+        <button type="submit" class="pixel-corners pixel-btn px-3 py-2">Adicionar</button>
       </form>
     </section>
 
-    <section class="bg-white rounded-lg shadow p-4 space-y-3">
-      <h2 class="font-semibold text-lg">Suas turmas</h2>
-      <p v-if="turmasStore.error" class="text-red-600 text-sm">{{ turmasStore.error }}</p>
-      <ul class="space-y-2">
+    <section class="pixel-corners pixel-panel p-4 space-y-3">
+      <h2 class="font-pixel text-rank-gold text-xs">Suas turmas</h2>
+      <p v-if="turmasStore.error" class="text-red-400 text-sm font-retro">{{ turmasStore.error }}</p>
+      <ul class="space-y-2 font-retro text-lg">
         <li
           v-for="turma in turmasStore.items"
           :key="turma.id"
-          class="border rounded p-3 flex flex-wrap items-center gap-3"
-          :class="{ 'border-blue-500 bg-blue-50': turma.id === turmaSelecionadaId }"
+          class="pixel-corners border-2 border-rank-navy p-3 flex flex-wrap items-center gap-3"
+          :class="{ 'border-rank-gold bg-rank-navy': turma.id === turmaSelecionadaId }"
         >
-          <button class="font-medium underline" @click="selecionarTurma(turma.id)">{{ turma.nome }}</button>
-          <span class="text-xs text-slate-500 break-all">{{ linkPublico(turma.slug) }}</span>
-          <button class="text-xs bg-slate-200 px-2 py-1 rounded" @click="copiarLink(turma.slug)">
+          <button class="text-rank-gold underline" @click="selecionarTurma(turma.id)">{{ turma.nome }}</button>
+          <span class="text-sm text-slate-400 break-all">{{ linkPublico(turma.slug) }}</span>
+          <button class="pixel-corners pixel-btn text-[0.55rem] px-2 py-1" @click="copiarLink(turma.slug)">
             Copiar link público
           </button>
         </li>
       </ul>
-      <form class="flex gap-2" @submit.prevent="criarTurma">
+      <form class="flex gap-2 font-retro text-lg" @submit.prevent="criarTurma">
         <input
           v-model="novaTurmaNome"
           type="text"
           placeholder="Nova turma (ex: 3º Ano TI)"
-          class="border rounded px-2 py-1 flex-1"
+          class="pixel-input pixel-corners px-2 py-1 flex-1"
         />
-        <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Criar turma</button>
+        <button type="submit" class="pixel-corners pixel-btn px-3 py-2">Criar turma</button>
       </form>
     </section>
 
-    <section v-if="turmaSelecionadaId" class="bg-white rounded-lg shadow p-4 space-y-3">
-      <h2 class="font-semibold text-lg">Alunos</h2>
-      <p v-if="alunosStore.error" class="text-red-600 text-sm">{{ alunosStore.error }}</p>
-      <ul class="space-y-2">
-        <li v-for="aluno in alunosDaTurma" :key="aluno.id" class="flex items-center gap-3 border rounded p-2">
+    <section v-if="turmaSelecionadaId" class="pixel-corners pixel-panel p-4 space-y-3">
+      <h2 class="font-pixel text-rank-gold text-xs">Alunos</h2>
+      <p v-if="alunosStore.error" class="text-red-400 text-sm font-retro">{{ alunosStore.error }}</p>
+      <ul class="space-y-2 font-retro text-lg">
+        <li
+          v-for="aluno in alunosDaTurma"
+          :key="aluno.id"
+          class="pixel-corners border-2 border-rank-navy p-2 flex items-center gap-3"
+        >
           <img
             v-if="aluno.fotoUrl"
             :src="aluno.fotoUrl"
             :alt="aluno.nome"
-            class="w-10 h-10 rounded-full object-cover"
+            class="w-10 h-10 rounded-full object-cover border-2 border-rank-gold"
           />
-          <div v-else class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-sm">
+          <div
+            v-else
+            class="w-10 h-10 rounded-full bg-rank-navy border-2 border-rank-gold flex items-center justify-center font-pixel text-xs"
+          >
             {{ aluno.nome.charAt(0) }}
           </div>
           <span class="flex-1">{{ aluno.nome }}</span>
-          <input type="file" accept="image/*" @change="trocarFoto(aluno.id, $event)" />
+          <input type="file" accept="image/*" class="text-sm" @change="trocarFoto(aluno.id, $event)" />
         </li>
       </ul>
-      <form class="flex gap-2" @submit.prevent="criarAluno">
+      <form class="flex gap-2 font-retro text-lg" @submit.prevent="criarAluno">
         <input
           v-model="novoAlunoNome"
           type="text"
           placeholder="Nome do aluno"
-          class="border rounded px-2 py-1 flex-1"
+          class="pixel-input pixel-corners px-2 py-1 flex-1"
         />
-        <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Adicionar aluno</button>
+        <button type="submit" class="pixel-corners pixel-btn px-3 py-2">Adicionar aluno</button>
       </form>
     </section>
   </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useTurmasStore } from '../stores/turmas.js'
 import { useMateriasStore } from '../stores/materias.js'
 import { useAlunosStore } from '../stores/alunos.js'
@@ -8,6 +8,7 @@ import { useAvaliacoesStore } from '../stores/avaliacoes.js'
 import { useConquistasStore } from '../stores/conquistas.js'
 import { useRanking } from '../composables/useRanking.js'
 import { notaMaximaRule } from '../domain/conquistaRules/notaMaximaRule.js'
+import PodiumTop3 from '../components/PodiumTop3.vue'
 
 const turmasStore = useTurmasStore()
 const materiasStore = useMateriasStore()
@@ -32,6 +33,26 @@ const avaliacoesByAluno = computed(() => {
   }
   return map
 })
+
+// Rascunho local por aluno: evita que dois campos (prova1/prova2/participação)
+// salvos quase ao mesmo tempo pisem um no outro — o @change de cada input lê o
+// rascunho inteiro (já atualizado de forma síncrona pelo v-model), nunca o
+// valor possivelmente desatualizado que ainda está no store.
+const avaliacoesDraft = reactive({})
+
+watch(
+  avaliacoesByAluno,
+  (map) => {
+    for (const [alunoId, av] of Object.entries(map)) {
+      avaliacoesDraft[alunoId] = {
+        prova1: av?.prova1 ?? null,
+        prova2: av?.prova2 ?? null,
+        participacao: av?.participacao ?? null
+      }
+    }
+  },
+  { deep: true }
+)
 
 const ranking = useRanking({
   alunos,
@@ -75,14 +96,14 @@ async function salvarNota(tarefaId, alunoId, valor) {
   await tarefasStore.saveNota(alunoId, tarefaId, Number(valor), new Date().toISOString())
 }
 
-async function salvarAvaliacao(alunoId, campo, valor) {
-  const atual = avaliacoesByAluno.value[alunoId] ?? { prova1: null, prova2: null, participacao: null }
+async function salvarAvaliacao(alunoId) {
+  const draft = avaliacoesDraft[alunoId]
   await avaliacoesStore.upsert({
     alunoId,
     materiaId: materiaId.value,
-    prova1: campo === 'prova1' ? Number(valor) : atual.prova1,
-    prova2: campo === 'prova2' ? Number(valor) : atual.prova2,
-    participacao: campo === 'participacao' ? Number(valor) : atual.participacao
+    prova1: draft.prova1,
+    prova2: draft.prova2,
+    participacao: draft.participacao
   })
   await verificarNotaMaxima(alunoId)
 }
@@ -97,14 +118,14 @@ async function verificarNotaMaxima(alunoId) {
 
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold">Lançar notas e ranking</h1>
+    <h1 class="font-pixel text-rank-gold text-lg">Lançar notas e ranking</h1>
 
-    <div class="flex flex-wrap gap-3 bg-white rounded-lg shadow p-4">
-      <select v-model="turmaId" class="border rounded px-2 py-1">
+    <div class="pixel-corners pixel-panel flex flex-wrap gap-3 p-4">
+      <select v-model="turmaId" class="pixel-input pixel-corners px-2 py-1 font-retro text-lg">
         <option value="">Selecione a turma</option>
         <option v-for="turma in turmasStore.items" :key="turma.id" :value="turma.id">{{ turma.nome }}</option>
       </select>
-      <select v-model="materiaId" class="border rounded px-2 py-1">
+      <select v-model="materiaId" class="pixel-input pixel-corners px-2 py-1 font-retro text-lg">
         <option value="">Selecione a matéria</option>
         <option v-for="materia in materiasStore.items" :key="materia.id" :value="materia.id">
           {{ materia.nome }}
@@ -113,41 +134,49 @@ async function verificarNotaMaxima(alunoId) {
     </div>
 
     <template v-if="turmaId && materiaId">
-      <section class="bg-white rounded-lg shadow p-4 space-y-3">
-        <h2 class="font-semibold text-lg">Tarefas (CMSP)</h2>
-        <p v-if="tarefasStore.error" class="text-red-600 text-sm">{{ tarefasStore.error }}</p>
-        <ul class="flex flex-wrap gap-2 text-sm">
-          <li v-for="tarefa in tarefas" :key="tarefa.id" class="bg-slate-100 rounded px-2 py-1">
+      <section class="pixel-corners pixel-panel p-4 space-y-3">
+        <h2 class="font-pixel text-rank-gold text-xs">Tarefas (CMSP)</h2>
+        <p v-if="tarefasStore.error" class="text-red-400 text-sm font-retro">{{ tarefasStore.error }}</p>
+        <ul class="flex flex-wrap gap-2 text-sm font-retro">
+          <li v-for="tarefa in tarefas" :key="tarefa.id" class="pixel-corners bg-rank-navy px-2 py-1">
             {{ tarefa.titulo }} (máx {{ tarefa.notaMaxima }})
           </li>
         </ul>
-        <form class="flex flex-wrap gap-2 items-end" @submit.prevent="criarTarefa">
-          <input v-model="novaTarefa.titulo" type="text" placeholder="Título" class="border rounded px-2 py-1" />
+        <form class="flex flex-wrap gap-2 items-end font-retro text-lg" @submit.prevent="criarTarefa">
+          <input
+            v-model="novaTarefa.titulo"
+            type="text"
+            placeholder="Título"
+            class="pixel-input pixel-corners px-2 py-1"
+          />
           <input
             v-model="novaTarefa.cmspLink"
             type="text"
             placeholder="Link CMSP (opcional)"
-            class="border rounded px-2 py-1"
+            class="pixel-input pixel-corners px-2 py-1"
           />
-          <input v-model="novaTarefa.dataEntrega" type="date" class="border rounded px-2 py-1" />
+          <input v-model="novaTarefa.dataEntrega" type="date" class="pixel-input pixel-corners px-2 py-1" />
           <input
             v-model="novaTarefa.notaMaxima"
             type="number"
-            min="0.01"
+            min="0.5"
             step="0.5"
             placeholder="Nota máxima"
-            class="border rounded px-2 py-1 w-28"
+            class="pixel-input pixel-corners px-2 py-1 w-28"
           />
-          <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Adicionar tarefa</button>
+          <button type="submit" class="pixel-corners pixel-btn px-3 py-2">Adicionar tarefa</button>
         </form>
       </section>
 
-      <section class="bg-white rounded-lg shadow p-4 overflow-x-auto">
-        <h2 class="font-semibold text-lg mb-3">Ranking</h2>
-        <p v-if="avaliacoesStore.error" class="text-red-600 text-sm">{{ avaliacoesStore.error }}</p>
-        <table class="min-w-full text-sm">
+      <section class="pixel-corners pixel-panel p-4 overflow-x-auto">
+        <h2 class="font-pixel text-rank-gold text-xs mb-1">Ranking</h2>
+        <p v-if="avaliacoesStore.error" class="text-red-400 text-sm font-retro">{{ avaliacoesStore.error }}</p>
+
+        <PodiumTop3 v-if="ranking.length > 0" :linhas="ranking" />
+
+        <table class="min-w-full text-sm font-retro text-lg">
           <thead>
-            <tr class="text-left border-b">
+            <tr class="text-left border-b border-rank-navy text-rank-gold">
               <th class="p-2">#</th>
               <th class="p-2">Aluno</th>
               <th v-for="tarefa in tarefas" :key="tarefa.id" class="p-2">{{ tarefa.titulo }}</th>
@@ -161,8 +190,8 @@ async function verificarNotaMaxima(alunoId) {
             <tr
               v-for="(linha, index) in ranking"
               :key="linha.aluno.id"
-              :class="index < 3 ? 'bg-amber-50 font-medium' : ''"
-              class="border-b"
+              :class="index < 3 ? 'bg-rank-navy' : ''"
+              class="border-b border-rank-navy"
             >
               <td class="p-2">{{ index + 1 }}º {{ index < 3 ? '🏆' : '' }}</td>
               <td class="p-2">{{ linha.aluno.nome }}</td>
@@ -170,43 +199,43 @@ async function verificarNotaMaxima(alunoId) {
                 <input
                   type="number"
                   step="0.1"
-                  class="border rounded px-1 w-16"
+                  class="pixel-input pixel-corners px-1 w-16"
                   :value="notaDaTarefa(tarefa.id, linha.aluno.id)"
                   @change="salvarNota(tarefa.id, linha.aluno.id, $event.target.value)"
                 />
               </td>
-              <td class="p-2">
+              <td class="p-2" v-if="avaliacoesDraft[linha.aluno.id]">
                 <input
+                  v-model.number="avaliacoesDraft[linha.aluno.id].prova1"
                   type="number"
                   step="0.1"
-                  class="border rounded px-1 w-16"
-                  :value="avaliacoesByAluno[linha.aluno.id]?.prova1 ?? ''"
-                  @change="salvarAvaliacao(linha.aluno.id, 'prova1', $event.target.value)"
+                  class="pixel-input pixel-corners px-1 w-16"
+                  @change="salvarAvaliacao(linha.aluno.id)"
                 />
               </td>
-              <td class="p-2">
+              <td class="p-2" v-if="avaliacoesDraft[linha.aluno.id]">
                 <input
+                  v-model.number="avaliacoesDraft[linha.aluno.id].prova2"
                   type="number"
                   step="0.1"
-                  class="border rounded px-1 w-16"
-                  :value="avaliacoesByAluno[linha.aluno.id]?.prova2 ?? ''"
-                  @change="salvarAvaliacao(linha.aluno.id, 'prova2', $event.target.value)"
+                  class="pixel-input pixel-corners px-1 w-16"
+                  @change="salvarAvaliacao(linha.aluno.id)"
                 />
               </td>
-              <td class="p-2">
+              <td class="p-2" v-if="avaliacoesDraft[linha.aluno.id]">
                 <input
+                  v-model.number="avaliacoesDraft[linha.aluno.id].participacao"
                   type="number"
                   step="0.1"
-                  class="border rounded px-1 w-16"
-                  :value="avaliacoesByAluno[linha.aluno.id]?.participacao ?? ''"
-                  @change="salvarAvaliacao(linha.aluno.id, 'participacao', $event.target.value)"
+                  class="pixel-input pixel-corners px-1 w-16"
+                  @change="salvarAvaliacao(linha.aluno.id)"
                 />
               </td>
-              <td class="p-2 font-semibold">{{ linha.notaFinal.toFixed(1) }}</td>
+              <td class="p-2 font-pixel text-xs text-rank-gold">{{ linha.notaFinal.toFixed(1) }}</td>
             </tr>
           </tbody>
         </table>
-        <p v-if="alunos.length === 0" class="text-slate-500 text-sm mt-2">
+        <p v-if="alunos.length === 0" class="text-slate-400 text-sm font-retro mt-2">
           Nenhum aluno nesta turma ainda. Cadastre em "Turmas".
         </p>
       </section>

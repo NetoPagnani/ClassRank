@@ -29,11 +29,14 @@ function alternarModo() {
 </script>
 
 <template>
-  <div class="max-w-sm mx-auto mt-16 bg-white rounded-lg shadow p-6 space-y-4">
-    <h1 class="text-2xl font-bold">{{ modo === 'entrar' ? 'Entrar' : 'Criar conta de professor' }}</h1>
-    <form class="space-y-3" @submit.prevent="handleSubmit">
+  <div class="max-w-sm mx-auto mt-16 pixel-corners pixel-panel p-6 space-y-4">
+    <p class="font-pixel text-rank-gold text-[0.6rem] text-center">🏆 CLASSRANK</p>
+    <h1 class="font-pixel text-base text-white text-center">
+      {{ modo === 'entrar' ? 'Entrar' : 'Criar conta de professor' }}
+    </h1>
+    <form class="space-y-3 font-retro text-lg" @submit.prevent="handleSubmit">
       <div>
-        <label for="email" class="block text-sm font-medium">E-mail institucional</label>
+        <label for="email" class="block text-sm font-pixel text-rank-gold mb-1">E-mail institucional</label>
         <input
           id="email"
           v-model="email"
@@ -41,11 +44,11 @@ function alternarModo() {
           required
           autocomplete="email"
           placeholder="voce@professor.educacao.sp.gov.br"
-          class="w-full border rounded px-2 py-1"
+          class="w-full pixel-input pixel-corners px-2 py-1"
         />
       </div>
       <div>
-        <label for="password" class="block text-sm font-medium">Senha</label>
+        <label for="password" class="block text-sm font-pixel text-rank-gold mb-1">Senha</label>
         <input
           id="password"
           v-model="password"
@@ -53,20 +56,16 @@ function alternarModo() {
           required
           autocomplete="current-password"
           minlength="6"
-          class="w-full border rounded px-2 py-1"
+          class="w-full pixel-input pixel-corners px-2 py-1"
         />
       </div>
-      <button
-        type="submit"
-        :disabled="authStore.loading"
-        class="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-      >
+      <button type="submit" :disabled="authStore.loading" class="w-full pixel-corners pixel-btn py-2 disabled:opacity-50">
         {{ modo === 'entrar' ? 'Entrar' : 'Criar conta' }}
       </button>
     </form>
-    <p v-if="authStore.error" class="text-red-600 text-sm">{{ authStore.error }}</p>
-    <p v-if="authStore.message" class="text-green-700 text-sm">{{ authStore.message }}</p>
-    <button class="text-sm text-blue-600 underline" @click="alternarModo">
+    <p v-if="authStore.error" class="text-red-400 text-sm font-retro">{{ authStore.error }}</p>
+    <p v-if="authStore.message" class="text-green-400 text-sm font-retro">{{ authStore.message }}</p>
+    <button class="text-sm text-rank-gold underline font-retro" @click="alternarModo">
       {{ modo === 'entrar' ? 'Ainda não tem conta? Criar conta' : 'Já tem conta? Entrar' }}
     </button>
   </div>

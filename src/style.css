@@ -1,3 +1,51 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  background: linear-gradient(180deg, #0b1526 0%, #0f1f38 45%, #132a4a 100%);
+  color: #e8edf5;
+  min-height: 100vh;
+}
+
+/* Cantos "pixelados" em degrau — usado nos cards/painéis/botões do tema retrô. */
+.pixel-corners {
+  clip-path: polygon(
+    0 8px, 8px 8px, 8px 0,
+    calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+    8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px)
+  );
+}
+
+.pixel-panel {
+  background: #16243d;
+  border: 3px solid #0a1220;
+  box-shadow: 4px 4px 0 0 rgba(0, 0, 0, 0.45);
+}
+
+.pixel-btn {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  background: #f5b942;
+  color: #16243d;
+  border: 3px solid #0a1220;
+  box-shadow: 3px 3px 0 0 rgba(0, 0, 0, 0.45);
+  transition: transform 0.05s ease;
+}
+
+.pixel-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 rgba(0, 0, 0, 0.45);
+}
+
+.pixel-input {
+  background: #0b1526;
+  border: 2px solid #2a3b5c;
+  color: #e8edf5;
+}
+
+.pixel-input::placeholder {
+  color: #5c6d8a;
+}
