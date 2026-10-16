@@ -3,6 +3,15 @@ import { ref } from 'vue'
 import { alunosRepository } from '../repositories/alunosRepository.js'
 import { storageRepository } from '../repositories/storageRepository.js'
 
+// Mutates in place (keeps reference equality for callers like `add`'s
+// return value) to fill in camelCase keys the real Supabase response
+// only has as snake_case (turma_id, foto_url).
+function normalizeAluno(row) {
+  if (row.turmaId === undefined) row.turmaId = row.turma_id
+  if (row.fotoUrl === undefined) row.fotoUrl = row.foto_url ?? null
+  return row
+}
+
 export const useAlunosStore = defineStore('alunos', () => {
   const itemsByTurma = ref({})
   const error = ref(null)
@@ -10,7 +19,7 @@ export const useAlunosStore = defineStore('alunos', () => {
   async function fetchByTurma(turmaId) {
     error.value = null
     try {
-      itemsByTurma.value[turmaId] = await alunosRepository.listByTurma(turmaId)
+      itemsByTurma.value[turmaId] = (await alunosRepository.listByTurma(turmaId)).map(normalizeAluno)
     } catch (err) {
       error.value = err.message
     }
@@ -19,7 +28,7 @@ export const useAlunosStore = defineStore('alunos', () => {
   async function add({ turmaId, nome }) {
     error.value = null
     try {
-      const row = await alunosRepository.create({ turmaId, nome, fotoUrl: null })
+      const row = normalizeAluno(await alunosRepository.create({ turmaId, nome, fotoUrl: null }))
       if (!itemsByTurma.value[turmaId]) {
         itemsByTurma.value[turmaId] = []
       }

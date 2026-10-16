@@ -39,5 +39,15 @@ export const tarefasRepository = {
       { onConflict: 'aluno_id,tarefa_id' }
     )
     if (error) throw new Error(error.message)
+  },
+
+  async listNotasByTarefas(tarefaIds) {
+    if (tarefaIds.length === 0) return []
+    const { data, error } = await supabase
+      .from('notas_tarefas')
+      .select('aluno_id, tarefa_id, nota, entregue_em')
+      .in('tarefa_id', tarefaIds)
+    if (error) throw new Error(error.message)
+    return data
   }
 }

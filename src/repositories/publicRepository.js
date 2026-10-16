@@ -23,5 +23,9 @@ export const publicRepository = {
   async getMissaoPublica(slug) {
     const rows = await callRpc('rpc_missao_publica', { p_slug: slug })
     return rows?.[0] ?? null
+  },
+
+  async getMateriasPublicas(slug) {
+    return callRpc('rpc_materias_turma_publica', { p_slug: slug })
   }
 }
