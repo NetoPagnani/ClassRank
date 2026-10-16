@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 
 const signInWithPasswordMock = vi.fn()
+const signUpMock = vi.fn()
 const signOutMock = vi.fn()
 const getSessionMock = vi.fn()
 
@@ -9,6 +10,7 @@ vi.mock('../../repositories/supabaseClient.js', () => ({
   supabase: {
     auth: {
       signInWithPassword: (...args) => signInWithPasswordMock(...args),
+      signUp: (...args) => signUpMock(...args),
       signOut: (...args) => signOutMock(...args),
       getSession: (...args) => getSessionMock(...args)
     }
@@ -21,8 +23,44 @@ describe('useAuthStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     signInWithPasswordMock.mockReset()
+    signUpMock.mockReset()
     signOutMock.mockReset()
     getSessionMock.mockReset()
+  })
+
+  describe('signUp', () => {
+    it('logs the user in directly when the session comes back confirmed', async () => {
+      const user = { id: '1' }
+      signUpMock.mockResolvedValue({ data: { user, session: { user } }, error: null })
+      const store = useAuthStore()
+
+      await store.signUp('a@professor.educacao.sp.gov.br', 'x')
+
+      expect(signUpMock).toHaveBeenCalledWith({ email: 'a@professor.educacao.sp.gov.br', password: 'x' })
+      expect(store.user).toEqual(user)
+      expect(store.error).toBeNull()
+    })
+
+    it('sets a confirmation message and leaves user null when email confirmation is required', async () => {
+      signUpMock.mockResolvedValue({ data: { user: { id: '1' }, session: null }, error: null })
+      const store = useAuthStore()
+
+      await store.signUp('a@professor.educacao.sp.gov.br', 'x')
+
+      expect(store.user).toBeNull()
+      expect(store.message).toContain('e-mail')
+      expect(store.error).toBeNull()
+    })
+
+    it('sets error and does not throw on failure', async () => {
+      signUpMock.mockResolvedValue({ data: {}, error: { message: 'User already registered' } })
+      const store = useAuthStore()
+
+      await expect(store.signUp('a@professor.educacao.sp.gov.br', 'x')).resolves.toBeUndefined()
+
+      expect(store.error).toBe('User already registered')
+      expect(store.user).toBeNull()
+    })
   })
 
   describe('signIn', () => {

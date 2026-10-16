@@ -8,29 +8,66 @@ const router = useRouter()
 
 const email = ref('')
 const password = ref('')
+const modo = ref('entrar')
 
 async function handleSubmit() {
-  await authStore.signIn(email.value, password.value)
+  if (modo.value === 'entrar') {
+    await authStore.signIn(email.value, password.value)
+  } else {
+    await authStore.signUp(email.value, password.value)
+  }
   if (authStore.user) {
     router.push({ name: 'home' })
   }
 }
+
+function alternarModo() {
+  modo.value = modo.value === 'entrar' ? 'cadastrar' : 'entrar'
+  authStore.error = null
+  authStore.message = null
+}
 </script>
 
 <template>
-  <div>
-    <h1>Entrar</h1>
-    <form @submit.prevent="handleSubmit">
+  <div class="max-w-sm mx-auto mt-16 bg-white rounded-lg shadow p-6 space-y-4">
+    <h1 class="text-2xl font-bold">{{ modo === 'entrar' ? 'Entrar' : 'Criar conta de professor' }}</h1>
+    <form class="space-y-3" @submit.prevent="handleSubmit">
       <div>
-        <label for="email">E-mail</label>
-        <input id="email" v-model="email" type="email" required autocomplete="email" />
+        <label for="email" class="block text-sm font-medium">E-mail institucional</label>
+        <input
+          id="email"
+          v-model="email"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="voce@professor.educacao.sp.gov.br"
+          class="w-full border rounded px-2 py-1"
+        />
       </div>
       <div>
-        <label for="password">Senha</label>
-        <input id="password" v-model="password" type="password" required autocomplete="current-password" />
+        <label for="password" class="block text-sm font-medium">Senha</label>
+        <input
+          id="password"
+          v-model="password"
+          type="password"
+          required
+          autocomplete="current-password"
+          minlength="6"
+          class="w-full border rounded px-2 py-1"
+        />
       </div>
-      <button type="submit" :disabled="authStore.loading">Entrar</button>
+      <button
+        type="submit"
+        :disabled="authStore.loading"
+        class="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
+      >
+        {{ modo === 'entrar' ? 'Entrar' : 'Criar conta' }}
+      </button>
     </form>
-    <p v-if="authStore.error">{{ authStore.error }}</p>
+    <p v-if="authStore.error" class="text-red-600 text-sm">{{ authStore.error }}</p>
+    <p v-if="authStore.message" class="text-green-700 text-sm">{{ authStore.message }}</p>
+    <button class="text-sm text-blue-600 underline" @click="alternarModo">
+      {{ modo === 'entrar' ? 'Ainda não tem conta? Criar conta' : 'Já tem conta? Entrar' }}
+    </button>
   </div>
 </template>
