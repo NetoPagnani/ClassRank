@@ -3,6 +3,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { publicRepository } from '../repositories/publicRepository.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
+import { classificarRanking } from '../domain/RankingPosicoes.js'
 import logo from '../assets/logo.png'
 import bau from '../assets/bau.png'
 
@@ -45,6 +46,8 @@ const linhasPodio = computed(() =>
     notaFinal: Number(linha.nota_final)
   }))
 )
+
+const linhasTabela = computed(() => classificarRanking(linhasPodio.value))
 </script>
 
 <template>
@@ -73,9 +76,27 @@ const linhasPodio = computed(() =>
         <template v-if="materiaId">
           <PodiumTop3 v-if="linhasPodio.length > 0" :linhas="linhasPodio" />
           <p v-else class="text-slate-200 text-sm text-center">Ainda não há notas lançadas nesta matéria.</p>
-          <p v-if="ranking.length > 3" class="text-slate-200 text-sm text-center">
-            + {{ ranking.length - 3 }} aluno(s) também participando dessa turma 🎮
-          </p>
+          <table v-if="linhasTabela.length > 0" class="w-full text-xl">
+            <thead>
+              <tr class="text-left border-b border-rank-navy text-rank-gold">
+                <th class="p-2 w-16">#</th>
+                <th class="p-2">Aluno</th>
+                <th class="p-2 text-right">Pontuação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="linha in linhasTabela"
+                :key="linha.aluno.id"
+                class="border-b border-rank-navy"
+                :class="linha.posicao <= 3 ? 'bg-rank-navy' : ''"
+              >
+                <td class="p-2">{{ linha.posicao }}º</td>
+                <td class="p-2">{{ linha.aluno.nome }}</td>
+                <td class="p-2 text-right font-pixel text-xs text-rank-gold">{{ linha.notaFinal.toFixed(1) }}</td>
+              </tr>
+            </tbody>
+          </table>
         </template>
         <p v-if="materias.length === 0" class="text-slate-200 text-sm">
           Nenhuma matéria com tarefas ainda.

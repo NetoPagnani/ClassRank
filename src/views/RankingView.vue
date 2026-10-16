@@ -10,6 +10,7 @@ import { useTurmaMateriasStore } from '../stores/turmaMaterias.js'
 import { useRanking } from '../composables/useRanking.js'
 import { avaliarConquistas } from '../domain/ConquistaEngine.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
+import { classificarRanking } from '../domain/RankingPosicoes.js'
 
 const turmasStore = useTurmasStore()
 const materiasStore = useMateriasStore()
@@ -72,6 +73,11 @@ const ranking = useRanking({
   notasByTarefa: computed(() => tarefasStore.notasByTarefa),
   avaliacoesByAluno
 })
+
+// Empatados recebem a mesma posição na coluna "#"
+const posicaoPorAluno = computed(
+  () => new Map(classificarRanking(ranking.value).map((l) => [l.aluno.id, l.posicao]))
+)
 
 onMounted(async () => {
   await Promise.all([turmasStore.fetchAll(), materiasStore.fetchAll()])
@@ -249,12 +255,12 @@ function historicoDoAluno(alunoId) {
             </tr>
           </thead>
           <tbody>
-            <template v-for="(linha, index) in ranking" :key="linha.aluno.id">
+            <template v-for="linha in ranking" :key="linha.aluno.id">
             <tr
-              :class="index < 3 ? 'bg-rank-navy' : ''"
+              :class="posicaoPorAluno.get(linha.aluno.id) <= 3 ? 'bg-rank-navy' : ''"
               class="border-b border-rank-navy"
             >
-              <td class="p-2">{{ index + 1 }}º {{ index < 3 ? '🏆' : '' }}</td>
+              <td class="p-2">{{ posicaoPorAluno.get(linha.aluno.id) }}º {{ posicaoPorAluno.get(linha.aluno.id) <= 3 ? '🏆' : '' }}</td>
               <td class="p-2">{{ linha.aluno.nome }}</td>
               <td v-for="tarefa in tarefas" :key="tarefa.id" class="p-2">
                 <input
