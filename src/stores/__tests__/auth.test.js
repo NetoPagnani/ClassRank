@@ -5,6 +5,8 @@ const signInWithPasswordMock = vi.fn()
 const signUpMock = vi.fn()
 const signOutMock = vi.fn()
 const getSessionMock = vi.fn()
+const resetPasswordForEmailMock = vi.fn()
+const updateUserMock = vi.fn()
 
 vi.mock('../../repositories/supabaseClient.js', () => ({
   supabase: {
@@ -12,7 +14,9 @@ vi.mock('../../repositories/supabaseClient.js', () => ({
       signInWithPassword: (...args) => signInWithPasswordMock(...args),
       signUp: (...args) => signUpMock(...args),
       signOut: (...args) => signOutMock(...args),
-      getSession: (...args) => getSessionMock(...args)
+      getSession: (...args) => getSessionMock(...args),
+      resetPasswordForEmail: (...args) => resetPasswordForEmailMock(...args),
+      updateUser: (...args) => updateUserMock(...args)
     }
   }
 }))
@@ -26,6 +30,8 @@ describe('useAuthStore', () => {
     signUpMock.mockReset()
     signOutMock.mockReset()
     getSessionMock.mockReset()
+    resetPasswordForEmailMock.mockReset()
+    updateUserMock.mockReset()
   })
 
   describe('signUp', () => {
@@ -131,6 +137,44 @@ describe('useAuthStore', () => {
       await store.restoreSession()
 
       expect(store.user).toBeNull()
+    })
+  })
+
+  describe('requestPasswordReset', () => {
+    it('sends the reset link back to /redefinir-senha and shows a neutral message', async () => {
+      resetPasswordForEmailMock.mockResolvedValue({ data: {}, error: null })
+      const store = useAuthStore()
+      await store.requestPasswordReset('ana@professor.educacao.sp.gov.br')
+      expect(resetPasswordForEmailMock).toHaveBeenCalledWith('ana@professor.educacao.sp.gov.br', {
+        redirectTo: `${window.location.origin}/redefinir-senha`
+      })
+      expect(store.message).toMatch(/Se esse e-mail tiver conta/)
+      expect(store.error).toBeNull()
+    })
+
+    it('sets error on failure, without throwing', async () => {
+      resetPasswordForEmailMock.mockResolvedValue({ data: null, error: { message: 'rate limit' } })
+      const store = useAuthStore()
+      await store.requestPasswordReset('x@y')
+      expect(store.error).toBe('rate limit')
+      expect(store.message).toBeNull()
+    })
+  })
+
+  describe('updatePassword', () => {
+    it('saves the new password and keeps the user signed in', async () => {
+      updateUserMock.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
+      const store = useAuthStore()
+      await expect(store.updatePassword('novaSenha1')).resolves.toBe(true)
+      expect(updateUserMock).toHaveBeenCalledWith({ password: 'novaSenha1' })
+      expect(store.user).toEqual({ id: 'u1' })
+    })
+
+    it('returns false and sets error when the recovery session is missing or expired', async () => {
+      updateUserMock.mockResolvedValue({ data: { user: null }, error: { message: 'Auth session missing!' } })
+      const store = useAuthStore()
+      await expect(store.updatePassword('novaSenha1')).resolves.toBe(false)
+      expect(store.error).toBe('Auth session missing!')
     })
   })
 })

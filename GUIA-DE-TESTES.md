@@ -7,13 +7,15 @@
 
 1. Abra o site, clique em **"Ainda não tem conta? Criar conta"**.
 2. Use um e-mail terminado em `@professor.educacao.sp.gov.br`.
-3. Depois de criar, faça login normalmente.
+3. Confirme o e-mail pelo link que chega na caixa de entrada e faça login normalmente.
+4. Esqueceu a senha? Na tela de login, clique em **"Esqueci minha senha"**, digite o e-mail e use o link que chegar para criar uma senha nova.
 
 ## O que testar
 
 - **Turmas**: criar turma, criar matéria (fica só dentro da turma), ligar/desligar matéria na turma, excluir turma/matéria.
 - **Alunos**: adicionar aluno, trocar nome (Editar), excluir, trocar avatar padrão (os dois quadradinhos) ou subir foto real (Escolher arquivo).
 - **Ranking**: escolher turma + matéria, cadastrar uma tarefa do CMSP, lançar nota da tarefa + Prova 1 + Prova 2 + Participação, ver o pódio Top 3 e o histórico de cada aluno ("Ver").
+- **Importar notas**: no Ranking, em "Importar notas", escolha a tarefa, clique em **"Baixar modelo"**, preencha as notas no Excel e envie o arquivo; confira a prévia e clique em "Lançar".
 - **Missão da semana**: em Turmas, com uma turma selecionada, criar/editar a missão (título, meta, progresso).
 - **Conquistas**: catálogo geral + conquistas de um aluno específico. Algumas são automáticas (nota máxima, pontualidade, presença exemplar).
 - **Link público do aluno**: em Turmas, botão "Copiar link público" de cada turma — abra em uma aba anônima (sem login) e veja o pódio da turma.

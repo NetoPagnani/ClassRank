@@ -7,6 +7,7 @@ import TurmasView from '../views/TurmasView.vue'
 import LoginView from '../views/LoginView.vue'
 import SobreView from '../views/SobreView.vue'
 import PublicTurmaView from '../views/PublicTurmaView.vue'
+import RedefinirSenhaView from '../views/RedefinirSenhaView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true } },
@@ -15,6 +16,7 @@ const routes = [
   { path: '/turmas', name: 'turmas', component: TurmasView, meta: { requiresAuth: true } },
   { path: '/login', name: 'login', component: LoginView },
   { path: '/sobre', name: 'sobre', component: SobreView },
+  { path: '/redefinir-senha', name: 'redefinir-senha', component: RedefinirSenhaView },
   { path: '/t/:slug', name: 'public-turma', component: PublicTurmaView, meta: { telaCheia: true } }
 ]
 
