@@ -29,3 +29,20 @@ test('XlsxParser.parse mapeia linhas de uma planilha gerada com exceljs', async 
   const file = new File([buffer], 'x.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
   await expect(new XlsxParser().parse(file)).resolves.toEqual([{ nome: 'Ana', nota: 8.5 }])
 })
+test('CsvParser.parse aceita o CSV do Excel em português (";" e vírgula decimal)', async () => {
+  const file = new File(['﻿nome;nota\r\n"Ana Lima";8,5\r\nBia;7\r\n'], 'x.csv', { type: 'text/csv' })
+  await expect(new CsvParser().parse(file)).resolves.toEqual([
+    { nome: 'Ana Lima', nota: 8.5 },
+    { nome: 'Bia', nota: 7 }
+  ])
+})
+test('XlsxParser.parse lê o resultado de fórmulas e ignora linhas sem nome', async () => {
+  const workbook = new ExcelJS.Workbook()
+  const sheet = workbook.addWorksheet('relatorio')
+  sheet.addRow(['nome', 'nota'])
+  sheet.addRow(['Ana', { formula: '4+4.5', result: 8.5 }])
+  sheet.addRow(['', 3])
+  const buffer = await workbook.xlsx.writeBuffer()
+  const file = new File([buffer], 'x.xlsx')
+  await expect(new XlsxParser().parse(file)).resolves.toEqual([{ nome: 'Ana', nota: 8.5 }])
+})

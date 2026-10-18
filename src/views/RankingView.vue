@@ -11,6 +11,8 @@ import { useRanking } from '../composables/useRanking.js'
 import { avaliarConquistas } from '../domain/ConquistaEngine.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
 import { classificarRanking } from '../domain/RankingPosicoes.js'
+import { ImportParserFactory } from '../domain/importParsers/ImportParserFactory.js'
+import { casarNotasComAlunos } from '../domain/importParsers/casarNotasComAlunos.js'
 
 const turmasStore = useTurmasStore()
 const materiasStore = useMateriasStore()
@@ -103,6 +105,59 @@ async function criarTarefa() {
     notaMaxima: Number(novaTarefa.value.notaMaxima)
   })
   novaTarefa.value = { titulo: '', cmspLink: '', dataEntrega: '', notaMaxima: 10 }
+}
+
+// Importação de notas de uma tarefa a partir do relatório da CMSP (CSV ou Excel):
+// lê o arquivo, mostra a prévia (quem casou e quem ficou de fora) e só grava depois da confirmação
+const importacao = ref({ tarefaId: '', previa: null, erro: null, salvando: false, resultado: null })
+const inputArquivo = ref(null)
+
+const tarefaDaImportacao = computed(() => tarefas.value.find((t) => t.id === importacao.value.tarefaId))
+const substituidas = computed(() => {
+  const previa = importacao.value.previa
+  if (!previa) return 0
+  return previa.encontrados.filter((e) => notaDaTarefa(importacao.value.tarefaId, e.aluno.id) !== '').length
+})
+
+function limparImportacao() {
+  importacao.value = { ...importacao.value, previa: null, erro: null, resultado: null }
+  if (inputArquivo.value) inputArquivo.value.value = ''
+}
+
+watch(() => importacao.value.tarefaId, limparImportacao)
+watch([turmaId, materiaId], () => (importacao.value.tarefaId = ''))
+
+async function lerArquivo(evento) {
+  const arquivo = evento.target.files?.[0]
+  importacao.value = { ...importacao.value, previa: null, erro: null, resultado: null }
+  if (!arquivo || !tarefaDaImportacao.value) return
+  try {
+    const linhas = await ImportParserFactory.create(arquivo).parse(arquivo)
+    if (linhas.length === 0) throw new Error('A planilha não tem nenhuma linha de aluno depois do cabeçalho.')
+    importacao.value.previa = casarNotasComAlunos(linhas, alunos.value, Number(tarefaDaImportacao.value.notaMaxima))
+  } catch (err) {
+    importacao.value.erro = err.message
+  }
+}
+
+async function confirmarImportacao() {
+  const { tarefaId, previa } = importacao.value
+  if (!previa || previa.encontrados.length === 0) return
+  importacao.value.salvando = true
+  const entregueEm = new Date().toISOString()
+  let lancadas = 0
+  for (const { aluno, nota } of previa.encontrados) {
+    await tarefasStore.saveNota(aluno.id, tarefaId, nota, entregueEm)
+    if (tarefasStore.error) break
+    lancadas += 1
+    await verificarConquistas(aluno.id)
+  }
+  const resultado = tarefasStore.error
+    ? `Parou depois de ${lancadas} nota(s): ${tarefasStore.error}`
+    : `${lancadas} nota(s) lançada(s).`
+  limparImportacao()
+  importacao.value.salvando = false
+  importacao.value.resultado = resultado
 }
 
 function notaDaTarefa(tarefaId, alunoId) {
@@ -233,6 +288,65 @@ function historicoDoAluno(alunoId) {
           />
           <button type="submit" class="pixel-corners pixel-btn px-3 py-2">Adicionar tarefa</button>
         </form>
+      </section>
+
+      <section class="pixel-corners pixel-panel p-4 space-y-3">
+        <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide">Importar notas (CSV ou Excel)</h2>
+        <p class="text-base text-slate-200">
+          A planilha precisa ter o nome do aluno na 1ª coluna e a nota na 2ª, com uma linha de cabeçalho.
+          Os nomes são comparados sem acento e sem diferença de maiúscula.
+        </p>
+        <p v-if="tarefas.length === 0" class="text-slate-200 text-sm">Cadastre a tarefa acima antes de importar as notas dela.</p>
+        <div v-else class="flex flex-wrap gap-3 items-center text-xl">
+          <select v-model="importacao.tarefaId" class="pixel-input pixel-corners px-2 py-1">
+            <option value="">Escolha a tarefa</option>
+            <option v-for="tarefa in tarefas" :key="tarefa.id" :value="tarefa.id">{{ tarefa.titulo }}</option>
+          </select>
+          <input
+            ref="inputArquivo"
+            type="file"
+            accept=".csv,.xlsx,.xls"
+            class="text-base"
+            :disabled="!importacao.tarefaId"
+            @change="lerArquivo"
+          />
+        </div>
+        <p v-if="importacao.erro" class="text-red-400 text-sm">{{ importacao.erro }}</p>
+        <p v-if="importacao.resultado" class="text-green-400 text-base">{{ importacao.resultado }}</p>
+
+        <div v-if="importacao.previa" class="space-y-3 text-lg">
+          <p>
+            <span class="text-green-400">{{ importacao.previa.encontrados.length }} nota(s) prontas para lançar</span>
+            em "{{ tarefaDaImportacao?.titulo }}" (máx {{ tarefaDaImportacao?.notaMaxima }})<span v-if="substituidas > 0">,
+            {{ substituidas }} vão substituir nota já lançada</span>.
+          </p>
+          <ul v-if="importacao.previa.encontrados.length > 0" class="flex flex-wrap gap-2 text-base">
+            <li v-for="e in importacao.previa.encontrados" :key="e.aluno.id" class="pixel-corners bg-rank-navy px-2 py-1">
+              {{ e.aluno.nome }}: <span class="text-rank-gold">{{ e.nota }}</span>
+            </li>
+          </ul>
+          <div v-if="importacao.previa.problemas.length > 0">
+            <p class="text-red-400">{{ importacao.previa.problemas.length }} linha(s) ficam de fora:</p>
+            <ul class="text-base space-y-1">
+              <li v-for="(p, i) in importacao.previa.problemas" :key="i">
+                {{ p.nome || '(sem nome)' }} — {{ Number.isFinite(p.nota) ? p.nota : 'sem nota' }}:
+                <span class="text-red-300">{{ p.motivo }}</span>
+              </li>
+            </ul>
+          </div>
+          <div class="flex gap-2">
+            <button
+              class="pixel-corners pixel-btn px-3 py-2"
+              :disabled="importacao.salvando || importacao.previa.encontrados.length === 0"
+              @click="confirmarImportacao"
+            >
+              {{ importacao.salvando ? 'Lançando...' : `Lançar ${importacao.previa.encontrados.length} nota(s)` }}
+            </button>
+            <button class="pixel-corners pixel-btn px-3 py-2 opacity-80" :disabled="importacao.salvando" @click="limparImportacao">
+              Cancelar
+            </button>
+          </div>
+        </div>
       </section>
 
       <section class="pixel-corners pixel-panel p-4 overflow-x-auto">

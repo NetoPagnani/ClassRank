@@ -1,4 +1,11 @@
 import ExcelJS from 'exceljs'
+import { lerNota } from './casarNotasComAlunos.js'
+
+// Célula com fórmula vem como { formula, result }; o que interessa é o resultado
+const valorDaCelula = (celula) => {
+  const valor = celula.value
+  return valor && typeof valor === 'object' && 'result' in valor ? valor.result : valor
+}
 
 /**
  * Parser para relatórios de notas da CMSP exportados em XLSX.
@@ -22,9 +29,9 @@ export class XlsxParser {
     sheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return
 
-      const nome = String(row.getCell(1).value)
-      const nota = Number(row.getCell(2).value)
-      rows.push({ nome, nota })
+      const nome = row.getCell(1).text.trim()
+      const nota = lerNota(valorDaCelula(row.getCell(2)))
+      if (nome) rows.push({ nome, nota })
     })
 
     return rows
