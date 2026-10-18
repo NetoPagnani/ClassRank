@@ -138,13 +138,13 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
 
         <div class="placa-madeira placa-esquerda">
           <div class="tabua">GRANDES CONQUISTAS COMEÇAM COM PEQUENAS ATITUDES!</div>
-          <div class="poste" style="height: 90px"></div>
+          <div class="poste"></div>
         </div>
         <div class="placa-madeira placa-direita">
           <div class="balao">VOCÊ TAMBÉM<br />PODE ESTAR AQUI!</div>
           <div class="placa-coluna">
             <div class="tabua">DISCIPLINA HOJE, GRANDES SONHOS AMANHÃ!</div>
-            <div class="poste" style="height: 70px"></div>
+            <div class="poste"></div>
           </div>
         </div>
 
@@ -392,11 +392,11 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
   border: 4px solid #0a1226;
 }
 
-/* Placas de madeira (somem em tela estreita) */
-.placa-madeira { position: absolute; display: flex; flex-direction: column; }
+/* Placas de madeira (somem em tela estreita): o poste estica até a grama, no pé do cenário */
+.placa-madeira { position: absolute; bottom: 0; display: flex; flex-direction: column; }
 .placa-esquerda { left: 4%; top: 170px; align-items: center; }
 .placa-direita { right: 4%; top: 120px; align-items: flex-end; gap: 22px; }
-.placa-coluna { display: flex; flex-direction: column; align-items: center; }
+.placa-coluna { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; }
 .tabua {
   width: 200px;
   padding: 22px 16px;
@@ -412,7 +412,7 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
   color: #fff1d0;
 }
 .placa-direita .tabua { padding: 20px 16px; }
-.poste { width: 14px; background: #5b3814; border: 3px solid #3a2208; border-top: none; }
+.poste { flex: 1 1 auto; width: 14px; background: #5b3814; border: 3px solid #3a2208; border-top: none; border-bottom: none; }
 .balao {
   padding: 12px 18px;
   background: #fff;
@@ -570,8 +570,12 @@ tbody tr.topo3 { box-shadow: inset 5px 0 0 var(--medalha); }
   font-size: 14px;
 }
 
-@media (max-width: 1000px) {
+/* Abaixo disso as placas encostariam ou cobririam o pódio */
+@media (max-width: 1320px) {
   .placa-madeira { display: none; }
+}
+
+@media (max-width: 1000px) {
   .grade { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; gap: 16px; }
   .geral, .missao, .recente, .frase { grid-column: 1; grid-row: auto; }
   .missao { order: 1; }
