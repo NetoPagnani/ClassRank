@@ -298,7 +298,7 @@ function historicoDoAluno(alunoId) {
         </p>
         <p v-if="tarefas.length === 0" class="text-slate-200 text-sm">Cadastre a tarefa acima antes de importar as notas dela.</p>
         <div v-else class="flex flex-wrap gap-3 items-center text-xl">
-          <select v-model="importacao.tarefaId" class="pixel-input pixel-corners px-2 py-1">
+          <select v-model="importacao.tarefaId" class="pixel-input pixel-corners px-2 py-1 max-w-full">
             <option value="">Escolha a tarefa</option>
             <option v-for="tarefa in tarefas" :key="tarefa.id" :value="tarefa.id">{{ tarefa.titulo }}</option>
           </select>
@@ -306,7 +306,7 @@ function historicoDoAluno(alunoId) {
             ref="inputArquivo"
             type="file"
             accept=".csv,.xlsx,.xls"
-            class="text-base"
+            class="text-base max-w-full"
             :disabled="!importacao.tarefaId"
             @change="lerArquivo"
           />
