@@ -65,7 +65,7 @@ async function handleLogout() {
       </nav>
       <button class="pixel-corners pixel-btn px-3 py-2" @click="handleLogout">Sair</button>
     </header>
-    <main class="p-4 max-w-5xl mx-auto">
+    <main :class="route.meta.telaCheia ? '' : 'p-4 max-w-5xl mx-auto'">
       <RouterView />
     </main>
   </div>

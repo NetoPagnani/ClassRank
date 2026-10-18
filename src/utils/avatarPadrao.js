@@ -16,3 +16,11 @@ export function avatarPadrao(nome) {
   const primeiroNome = nome.trim().split(/\s+/)[0].toLowerCase()
   return primeiroNome.endsWith('a') ? avatarFeminino : avatarMasculino
 }
+
+/** Se a foto salva não carregar (ex.: link antigo), troca uma única vez pelo avatar padrão. */
+export function usarAvatarPadraoNoErro(evento, nome) {
+  const img = evento.target
+  if (img.dataset.avatarPadrao) return
+  img.dataset.avatarPadrao = '1'
+  img.src = avatarPadrao(nome)
+}

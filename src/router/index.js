@@ -15,7 +15,7 @@ const routes = [
   { path: '/turmas', name: 'turmas', component: TurmasView, meta: { requiresAuth: true } },
   { path: '/login', name: 'login', component: LoginView },
   { path: '/sobre', name: 'sobre', component: SobreView },
-  { path: '/t/:slug', name: 'public-turma', component: PublicTurmaView }
+  { path: '/t/:slug', name: 'public-turma', component: PublicTurmaView, meta: { telaCheia: true } }
 ]
 
 const router = createRouter({
