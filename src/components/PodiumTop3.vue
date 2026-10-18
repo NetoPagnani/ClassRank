@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
-import { avatarPadrao, usarAvatarPadraoNoErro } from '../utils/avatarPadrao.js'
+import { fotoDoAluno, usarAvatarPadraoNoErro } from '../utils/avatarPadrao.js'
 import { agruparPodio } from '../domain/RankingPosicoes.js'
 
 const props = defineProps({
@@ -82,7 +82,7 @@ const degraus = computed(() =>
         <img
           v-for="linha in d.rostos"
           :key="linha.aluno.id"
-          :src="linha.aluno.fotoUrl || avatarPadrao(linha.aluno.nome)"
+          :src="fotoDoAluno(linha.aluno.fotoUrl, linha.aluno.nome)"
           :alt="linha.aluno.nome"
           class="foto"
           @error="usarAvatarPadraoNoErro($event, linha.aluno.nome)"

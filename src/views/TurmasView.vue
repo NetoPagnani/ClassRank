@@ -5,7 +5,7 @@ import { useMateriasStore } from '../stores/materias.js'
 import { useAlunosStore } from '../stores/alunos.js'
 import { useMissoesStore } from '../stores/missoes.js'
 import { useTurmaMateriasStore } from '../stores/turmaMaterias.js'
-import { avatarPadrao, AVATARES_PADRAO } from '../utils/avatarPadrao.js'
+import { fotoDoAluno, idAvatarPadrao, AVATARES_PADRAO } from '../utils/avatarPadrao.js'
 
 const turmasStore = useTurmasStore()
 const materiasStore = useMateriasStore()
@@ -240,7 +240,7 @@ async function copiarLink(slug) {
           class="pixel-corners border-2 border-rank-navy p-2 flex items-center gap-3"
         >
           <img
-            :src="aluno.fotoUrl || avatarPadrao(aluno.nome)"
+            :src="fotoDoAluno(aluno.fotoUrl, aluno.nome)"
             :alt="aluno.nome"
             class="pixel-corners w-10 h-10 object-cover border-2 border-rank-gold shadow-[2px_2px_0_0_rgba(0,0,0,0.45)]"
           />
@@ -249,8 +249,8 @@ async function copiarLink(slug) {
               v-for="avatar in AVATARES_PADRAO"
               :key="avatar.id"
               class="pixel-corners w-6 h-6 overflow-hidden"
-              :class="aluno.fotoUrl === avatar.url ? 'border-2 border-rank-gold' : 'border-2 border-transparent opacity-60'"
-              @click="alunosStore.definirFoto(aluno.id, avatar.url)"
+              :class="idAvatarPadrao(aluno.fotoUrl) === avatar.id ? 'border-2 border-rank-gold' : 'border-2 border-transparent opacity-60'"
+              @click="alunosStore.definirFoto(aluno.id, avatar.valor)"
             >
               <img :src="avatar.url" class="w-full h-full object-cover" />
             </button>

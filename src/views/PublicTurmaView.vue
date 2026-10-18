@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { publicRepository } from '../repositories/publicRepository.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
 import { classificarRanking } from '../domain/RankingPosicoes.js'
-import { avatarPadrao, usarAvatarPadraoNoErro } from '../utils/avatarPadrao.js'
+import { fotoDoAluno, usarAvatarPadraoNoErro } from '../utils/avatarPadrao.js'
 import logo from '../assets/logo.png'
 import bau from '../assets/bau.png'
 import cenario from '../assets/cenario-castelo.webp'
@@ -72,7 +72,7 @@ const conquistasDoAluno = (nome) => {
 }
 
 const conquistaRecente = computed(() => conquistas.value[0] ?? null)
-const fotoDoAluno = (nome) => ranking.value.find((l) => l.nome === nome)?.foto_url || avatarPadrao(nome)
+const fotoPorNome = (nome) => fotoDoAluno(ranking.value.find((l) => l.nome === nome)?.foto_url, nome)
 
 const progressoMissao = computed(() => {
   if (!missao.value) return 0
@@ -190,7 +190,7 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
                     <td class="col-pos posicao">{{ linha.posicao }}º</td>
                     <td class="col-aluno">
                       <div class="aluno">
-                        <img :src="linha.aluno.fotoUrl || avatarPadrao(linha.aluno.nome)" alt="" class="avatar" @error="usarAvatarPadraoNoErro($event, linha.aluno.nome)" />
+                        <img :src="fotoDoAluno(linha.aluno.fotoUrl, linha.aluno.nome)" alt="" class="avatar" @error="usarAvatarPadraoNoErro($event, linha.aluno.nome)" />
                         <span>{{ linha.aluno.nome }}</span>
                       </div>
                     </td>
@@ -263,7 +263,7 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
             <div class="recente-texto">
               <h2 id="titulo-recente">CONQUISTA RECENTE</h2>
               <div class="recente-aluno">
-                <img :src="fotoDoAluno(conquistaRecente.aluno_nome)" alt="" @error="usarAvatarPadraoNoErro($event, conquistaRecente.aluno_nome)" />
+                <img :src="fotoPorNome(conquistaRecente.aluno_nome)" alt="" @error="usarAvatarPadraoNoErro($event, conquistaRecente.aluno_nome)" />
                 <p>
                   <span class="ouro forte">{{ conquistaRecente.aluno_nome }}</span><br />
                   completou a conquista <span class="forte">“{{ conquistaRecente.conquista_nome }}”</span>!
