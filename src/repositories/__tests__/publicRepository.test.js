@@ -32,7 +32,7 @@ describe('publicRepository', () => {
   })
 
   it('getConquistasPublicas resolves the unlocked achievements', async () => {
-    const rows = [{ aluno_nome: 'Ana', conquista_nome: 'Pontual', conquista_icone: 'clock', data_conquistada: '2026-10-01' }]
+    const rows = [{ aluno_id: 'a1', aluno_nome: 'Ana', conquista_nome: 'Pontual', conquista_icone: 'clock', data_conquistada: '2026-10-01' }]
     rpcMock.mockResolvedValueOnce({ data: rows, error: null })
     await expect(publicRepository.getConquistasPublicas('abc')).resolves.toEqual(rows)
     expect(rpcMock).toHaveBeenCalledWith('rpc_conquistas_publicas', { p_slug: 'abc' })

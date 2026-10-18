@@ -55,24 +55,24 @@ const linhasPodio = computed(() =>
 const linhasTabela = computed(() => classificarRanking(linhasPodio.value))
 const nomeMateria = computed(() => materias.value.find((m) => m.id === materiaId.value)?.nome ?? '')
 
-// As conquistas públicas vêm com o nome do aluno (não o id); os ícones seguem o campo "icone" do banco
+// Conquistas agrupadas por aluno_id; os ícones seguem o campo "icone" do banco
 const ICONES_CONQUISTA = ['clock', 'star', 'shield']
 const conquistasPorAluno = computed(() => {
   const mapa = new Map()
   for (const c of conquistas.value) {
-    if (!mapa.has(c.aluno_nome)) mapa.set(c.aluno_nome, new Map())
-    mapa.get(c.aluno_nome).set(c.conquista_icone, c.conquista_nome)
+    if (!mapa.has(c.aluno_id)) mapa.set(c.aluno_id, new Map())
+    mapa.get(c.aluno_id).set(c.conquista_icone, c.conquista_nome)
   }
   return mapa
 })
-const conquistasDoAluno = (nome) => {
-  const doAluno = conquistasPorAluno.value.get(nome)
+const conquistasDoAluno = (alunoId) => {
+  const doAluno = conquistasPorAluno.value.get(alunoId)
   if (!doAluno) return []
   return ICONES_CONQUISTA.filter((icone) => doAluno.has(icone)).map((icone) => ({ icone, nome: doAluno.get(icone) }))
 }
 
 const conquistaRecente = computed(() => conquistas.value[0] ?? null)
-const fotoPorNome = (nome) => fotoDoAluno(ranking.value.find((l) => l.nome === nome)?.foto_url, nome)
+const fotoDaConquista = (c) => fotoDoAluno(ranking.value.find((l) => l.aluno_id === c.aluno_id)?.foto_url, c.aluno_nome)
 
 const progressoMissao = computed(() => {
   if (!missao.value) return 0
@@ -198,7 +198,7 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
                     <td class="col-conquistas">
                       <div class="selos">
                         <span
-                          v-for="c in conquistasDoAluno(linha.aluno.nome)"
+                          v-for="c in conquistasDoAluno(linha.aluno.id)"
                           :key="c.icone"
                           class="selo"
                           :class="`selo-${c.icone}`"
@@ -263,7 +263,7 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
             <div class="recente-texto">
               <h2 id="titulo-recente">CONQUISTA RECENTE</h2>
               <div class="recente-aluno">
-                <img :src="fotoPorNome(conquistaRecente.aluno_nome)" alt="" @error="usarAvatarPadraoNoErro($event, conquistaRecente.aluno_nome)" />
+                <img :src="fotoDaConquista(conquistaRecente)" alt="" @error="usarAvatarPadraoNoErro($event, conquistaRecente.aluno_nome)" />
                 <p>
                   <span class="ouro forte">{{ conquistaRecente.aluno_nome }}</span><br />
                   completou a conquista <span class="forte">“{{ conquistaRecente.conquista_nome }}”</span>!
