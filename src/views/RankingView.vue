@@ -13,6 +13,7 @@ import PodiumTop3 from '../components/PodiumTop3.vue'
 import { classificarRanking } from '../domain/RankingPosicoes.js'
 import { ImportParserFactory } from '../domain/importParsers/ImportParserFactory.js'
 import { casarNotasComAlunos } from '../domain/importParsers/casarNotasComAlunos.js'
+import { gerarModeloPlanilha, nomeArquivoModelo } from '../domain/importParsers/modeloPlanilha.js'
 
 const turmasStore = useTurmasStore()
 const materiasStore = useMateriasStore()
@@ -126,6 +127,20 @@ function limparImportacao() {
 
 watch(() => importacao.value.tarefaId, limparImportacao)
 watch([turmaId, materiaId], () => (importacao.value.tarefaId = ''))
+
+async function baixarModelo() {
+  const tarefa = tarefaDaImportacao.value
+  if (!tarefa) return
+  const buffer = await gerarModeloPlanilha(alunos.value, tarefa)
+  const url = URL.createObjectURL(
+    new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  )
+  const link = document.createElement('a')
+  link.href = url
+  link.download = nomeArquivoModelo(tarefa)
+  link.click()
+  URL.revokeObjectURL(url)
+}
 
 async function lerArquivo(evento) {
   const arquivo = evento.target.files?.[0]
@@ -293,8 +308,9 @@ function historicoDoAluno(alunoId) {
       <section class="pixel-corners pixel-panel p-4 space-y-3">
         <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide">Importar notas (CSV ou Excel)</h2>
         <p class="text-base text-slate-200">
-          A planilha precisa ter o nome do aluno na 1ª coluna e a nota na 2ª, com uma linha de cabeçalho.
-          Os nomes são comparados sem acento e sem diferença de maiúscula.
+          Escolha a tarefa e baixe o modelo: ele já vem com todos os alunos da turma, é só digitar as notas e enviar.
+          Aluno com a nota em branco fica de fora. Também serve outra planilha com o nome na 1ª coluna e a nota na 2ª
+          (os nomes são comparados sem acento e sem diferença de maiúscula).
         </p>
         <p v-if="tarefas.length === 0" class="text-slate-200 text-sm">Cadastre a tarefa acima antes de importar as notas dela.</p>
         <div v-else class="flex flex-wrap gap-3 items-center text-xl">
@@ -302,6 +318,14 @@ function historicoDoAluno(alunoId) {
             <option value="">Escolha a tarefa</option>
             <option v-for="tarefa in tarefas" :key="tarefa.id" :value="tarefa.id">{{ tarefa.titulo }}</option>
           </select>
+          <button
+            type="button"
+            class="pixel-corners pixel-btn px-3 py-2 text-base"
+            :disabled="!importacao.tarefaId || alunos.length === 0"
+            @click="baixarModelo"
+          >
+            Baixar modelo
+          </button>
           <input
             ref="inputArquivo"
             type="file"

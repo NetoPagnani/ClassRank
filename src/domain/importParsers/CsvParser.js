@@ -18,9 +18,12 @@ export class CsvParser {
     const separador = lines[0]?.includes(';') ? ';' : ','
     const dataLines = lines.slice(1)
 
-    return dataLines.map((line) => {
-      const [nome = '', nota = ''] = line.split(separador)
-      return { nome: tirarAspas(nome), nota: lerNota(tirarAspas(nota)) }
-    })
+    return dataLines
+      .map((line) => {
+        const [nome = '', nota = ''] = line.split(separador)
+        return { nome: tirarAspas(nome), nota: tirarAspas(nota) }
+      })
+      .filter((linha) => linha.nome && linha.nota !== '') // nota em branco = ainda não lançada
+      .map((linha) => ({ nome: linha.nome, nota: lerNota(linha.nota) }))
   }
 }

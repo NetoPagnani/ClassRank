@@ -46,3 +46,7 @@ test('XlsxParser.parse lê o resultado de fórmulas e ignora linhas sem nome', a
   const file = new File([buffer], 'x.xlsx')
   await expect(new XlsxParser().parse(file)).resolves.toEqual([{ nome: 'Ana', nota: 8.5 }])
 })
+test('CsvParser.parse ignora alunos com a nota em branco', async () => {
+  const file = new File(['nome;nota\nAna;8\nBia;\n'], 'x.csv')
+  await expect(new CsvParser().parse(file)).resolves.toEqual([{ nome: 'Ana', nota: 8 }])
+})

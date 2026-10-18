@@ -11,7 +11,7 @@ const valorDaCelula = (celula) => {
  * Parser para relatórios de notas da CMSP exportados em XLSX.
  * Lê a primeira planilha do workbook e mapeia as linhas após o
  * cabeçalho para `{nome, nota}` pela posição das colunas (1ª = nome,
- * 2ª = nota).
+ * 2ª = nota). Linhas com a nota em branco ficam de fora.
  */
 export class XlsxParser {
   /**
@@ -30,8 +30,10 @@ export class XlsxParser {
       if (rowNumber === 1) return
 
       const nome = row.getCell(1).text.trim()
-      const nota = lerNota(valorDaCelula(row.getCell(2)))
-      if (nome) rows.push({ nome, nota })
+      const valor = valorDaCelula(row.getCell(2))
+      // Nota em branco = ainda não lançada (o modelo vem com todos os alunos)
+      if (!nome || valor === null || valor === undefined || String(valor).trim() === '') return
+      rows.push({ nome, nota: lerNota(valor) })
     })
 
     return rows
