@@ -16,10 +16,6 @@ export const publicRepository = {
     return callRpc('rpc_ranking_publico', { p_slug: slug, p_materia_id: materiaId })
   },
 
-  async getConquistasPublicas(slug) {
-    return callRpc('rpc_conquistas_publicas', { p_slug: slug })
-  },
-
   async getMissaoPublica(slug) {
     const rows = await callRpc('rpc_missao_publica', { p_slug: slug })
     return rows?.[0] ?? null

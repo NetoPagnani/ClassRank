@@ -17,7 +17,6 @@ const carregando = ref(true)
 const materias = ref([])
 const materiaId = ref('')
 const ranking = ref([])
-const conquistas = ref([])
 const missao = ref(null)
 const error = ref(null)
 
@@ -26,7 +25,6 @@ onMounted(async () => {
     turma.value = await publicRepository.getTurmaBySlug(slug)
     if (!turma.value) return
     materias.value = await publicRepository.getMateriasPublicas(slug)
-    conquistas.value = await publicRepository.getConquistasPublicas(slug)
     missao.value = await publicRepository.getMissaoPublica(slug)
     if (materias.value.length > 0) materiaId.value = materias.value[0].id
   } catch (err) {
@@ -54,25 +52,6 @@ const linhasPodio = computed(() =>
 
 const linhasTabela = computed(() => classificarRanking(linhasPodio.value))
 const nomeMateria = computed(() => materias.value.find((m) => m.id === materiaId.value)?.nome ?? '')
-
-// Conquistas agrupadas por aluno_id; os ícones seguem o campo "icone" do banco
-const ICONES_CONQUISTA = ['clock', 'star', 'shield']
-const conquistasPorAluno = computed(() => {
-  const mapa = new Map()
-  for (const c of conquistas.value) {
-    if (!mapa.has(c.aluno_id)) mapa.set(c.aluno_id, new Map())
-    mapa.get(c.aluno_id).set(c.conquista_icone, c.conquista_nome)
-  }
-  return mapa
-})
-const conquistasDoAluno = (alunoId) => {
-  const doAluno = conquistasPorAluno.value.get(alunoId)
-  if (!doAluno) return []
-  return ICONES_CONQUISTA.filter((icone) => doAluno.has(icone)).map((icone) => ({ icone, nome: doAluno.get(icone) }))
-}
-
-const conquistaRecente = computed(() => conquistas.value[0] ?? null)
-const fotoDaConquista = (c) => fotoDoAluno(ranking.value.find((l) => l.aluno_id === c.aluno_id)?.foto_url, c.aluno_nome)
 
 const progressoMissao = computed(() => {
   if (!missao.value) return 0
@@ -177,7 +156,6 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
                     <th scope="col" class="col-pos">#</th>
                     <th scope="col">ALUNO</th>
                     <th scope="col" class="col-pontos">PONTOS</th>
-                    <th scope="col" class="col-conquistas">CONQUISTAS</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -195,36 +173,6 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
                       </div>
                     </td>
                     <td class="col-pontos pontos">{{ linha.notaFinal.toFixed(1) }}<span class="sufixo"> pts</span></td>
-                    <td class="col-conquistas">
-                      <div class="selos">
-                        <span
-                          v-for="c in conquistasDoAluno(linha.aluno.id)"
-                          :key="c.icone"
-                          class="selo"
-                          :class="`selo-${c.icone}`"
-                          :title="c.nome"
-                        >
-                          <svg viewBox="0 0 7 7" shape-rendering="crispEdges" role="img" :aria-label="c.nome">
-                            <template v-if="c.icone === 'clock'">
-                              <rect x="1" y="0" width="5" height="1" fill="#fff" /><rect x="0" y="1" width="1" height="5" fill="#fff" />
-                              <rect x="6" y="1" width="1" height="5" fill="#fff" /><rect x="1" y="6" width="5" height="1" fill="#fff" />
-                              <rect x="3" y="2" width="1" height="2" fill="#fff" /><rect x="4" y="3" width="1" height="1" fill="#fff" />
-                            </template>
-                            <template v-else-if="c.icone === 'star'">
-                              <rect x="3" y="0" width="1" height="2" fill="#fff" /><rect x="0" y="2" width="7" height="1" fill="#fff" />
-                              <rect x="1" y="3" width="5" height="1" fill="#fff" /><rect x="2" y="4" width="3" height="1" fill="#fff" />
-                              <rect x="1" y="5" width="2" height="2" fill="#fff" /><rect x="4" y="5" width="2" height="2" fill="#fff" />
-                            </template>
-                            <template v-else>
-                              <rect x="0" y="1" width="7" height="6" fill="#fff" /><rect x="1" y="0" width="1" height="2" fill="#fff" />
-                              <rect x="5" y="0" width="1" height="2" fill="#fff" /><rect x="0" y="2" width="7" height="1" fill="#be123c" />
-                              <rect x="2" y="4" width="1" height="1" fill="#be123c" /><rect x="3" y="5" width="1" height="1" fill="#be123c" />
-                              <rect x="4" y="3" width="1" height="2" fill="#be123c" />
-                            </template>
-                          </svg>
-                        </span>
-                      </div>
-                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -248,26 +196,6 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
                   <div class="barra-cheia" :style="{ width: `${progressoMissao}%` }"></div>
                 </div>
                 <span class="fracao">{{ Number(missao.progresso_atual) }}/{{ Number(missao.meta) }}</span>
-              </div>
-            </div>
-          </section>
-
-          <section v-if="conquistaRecente" class="painel recente" aria-labelledby="titulo-recente">
-            <svg class="estrela" viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true">
-              <rect x="4" y="0" width="1" height="2" fill="#ffd23f" /><rect x="3" y="2" width="3" height="1" fill="#ffd23f" />
-              <rect x="0" y="3" width="9" height="1" fill="#ffd23f" /><rect x="1" y="4" width="7" height="1" fill="#ffd23f" />
-              <rect x="2" y="5" width="5" height="1" fill="#ffd23f" /><rect x="2" y="6" width="2" height="1" fill="#ffd23f" />
-              <rect x="5" y="6" width="2" height="1" fill="#ffd23f" /><rect x="1" y="7" width="2" height="2" fill="#ffd23f" />
-              <rect x="6" y="7" width="2" height="2" fill="#ffd23f" />
-            </svg>
-            <div class="recente-texto">
-              <h2 id="titulo-recente">CONQUISTA RECENTE</h2>
-              <div class="recente-aluno">
-                <img :src="fotoDaConquista(conquistaRecente)" alt="" @error="usarAvatarPadraoNoErro($event, conquistaRecente.aluno_nome)" />
-                <p>
-                  <span class="ouro forte">{{ conquistaRecente.aluno_nome }}</span><br />
-                  completou a conquista <span class="forte">“{{ conquistaRecente.conquista_nome }}”</span>!
-                </p>
               </div>
             </div>
           </section>
@@ -444,7 +372,7 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
 }
 .erro { max-width: 1280px; margin: 0 auto 16px; padding: 10px 14px; color: #fff; background: #be123c; border: 4px solid #0a1226; }
 
-/* Ranking geral à esquerda; missão, conquista recente e frase na coluna lateral */
+/* Ranking geral à esquerda; missão e frase na coluna lateral */
 .grade {
   max-width: 1280px;
   margin: 0 auto;
@@ -455,7 +383,7 @@ const CORES_MEDALHA = { 1: '#ffd23f', 2: '#c9d1dc', 3: '#d98b4a' }
   align-items: start;
 }
 .geral { grid-column: 1; grid-row: 1 / span 3; }
-.missao, .recente, .frase { grid-column: 2; }
+.missao, .frase { grid-column: 2; }
 
 .painel {
   background: #13203d;
@@ -484,8 +412,7 @@ thead tr { font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 2px
 th { padding: 10px 12px; font-weight: 400; }
 td { padding: 8px 12px; }
 .col-pos { width: 56px; padding-left: 20px; padding-right: 20px; }
-.col-pontos { width: 120px; white-space: nowrap; }
-.col-conquistas { width: 170px; padding-right: 20px; }
+.col-pontos { width: 120px; white-space: nowrap; padding-right: 20px; }
 tbody tr { background: #1a2b52; }
 tbody tr:nth-child(even) { background: #162548; }
 tbody tr.topo3 { box-shadow: inset 5px 0 0 var(--medalha); }
@@ -502,21 +429,6 @@ tbody tr.topo3 { box-shadow: inset 5px 0 0 var(--medalha); }
   background: #0a1226;
 }
 .pontos { font-weight: 600; }
-.selos { display: flex; gap: 8px; }
-.selo {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid #0a1226;
-  border-radius: 50%;
-}
-.selo svg { width: 14px; height: 14px; }
-.selo-clock { background: #0e7490; }
-.selo-star { background: #f0a500; }
-.selo-shield { background: #be123c; }
-
 .missao { display: flex; gap: 16px; padding: 18px; }
 .pergaminho { width: 52px; height: 60px; flex: 0 0 auto; }
 .missao-texto { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -528,22 +440,6 @@ tbody tr.topo3 { box-shadow: inset 5px 0 0 var(--medalha); }
 .barra { flex: 1 1 auto; height: 16px; padding: 2px; background: #0a1226; border: 3px solid #2a3d6e; border-radius: 10px; }
 .barra-cheia { height: 100%; background: #22c55e; border-radius: 6px; box-shadow: inset 0 -4px 0 #15803d; }
 .fracao { font-family: 'Press Start 2P', monospace; font-size: 11px; }
-
-.recente {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  padding: 18px;
-  background: #4c2a8a;
-  border-color: #1e0f3d;
-  box-shadow: inset 0 0 0 3px #7c4dd1, 6px 6px 0 rgba(0, 0, 0, 0.4);
-}
-.estrela { width: 44px; height: 44px; flex: 0 0 auto; }
-.recente-texto { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.recente h2 { color: #d8c4ff; }
-.recente-aluno { display: flex; align-items: center; gap: 12px; }
-.recente-aluno img { width: 54px; height: 54px; flex: 0 0 auto; object-fit: cover; border: 3px solid #1e0f3d; border-radius: 6px; }
-.recente-aluno p { margin: 0; line-height: 1.3; overflow-wrap: anywhere; }
 
 .frase {
   display: flex;
@@ -577,11 +473,10 @@ tbody tr.topo3 { box-shadow: inset 5px 0 0 var(--medalha); }
 
 @media (max-width: 1000px) {
   .grade { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; gap: 16px; }
-  .geral, .missao, .recente, .frase { grid-column: 1; grid-row: auto; }
+  .geral, .missao, .frase { grid-column: 1; grid-row: auto; }
   .missao { order: 1; }
   .geral { order: 2; }
-  .recente { order: 3; }
-  .frase { order: 4; }
+  .frase { order: 3; }
 }
 
 @media (max-width: 640px) {
@@ -614,7 +509,7 @@ tbody tr.topo3 { box-shadow: inset 5px 0 0 var(--medalha); }
   th, td { padding: 7px 6px; }
   .col-pos { width: 36px; padding-left: 14px; padding-right: 10px; }
   .col-pontos { width: auto; text-align: right; padding-right: 14px; font-weight: 800; }
-  .col-conquistas, .sufixo { display: none; }
+  .sufixo { display: none; }
   .posicao { font-size: 10px; }
   .aluno { gap: 10px; }
   .avatar { width: 32px; height: 32px; border-width: 2px; }
@@ -624,11 +519,9 @@ tbody tr.topo3 { box-shadow: inset 5px 0 0 var(--medalha); }
   .missao-texto { gap: 6px; }
   .barra { height: 14px; }
   .fracao { font-size: 10px; }
-  .recente, .frase { padding: 14px; gap: 12px; }
-  .recente { box-shadow: inset 0 0 0 3px #7c4dd1, 4px 4px 0 rgba(0, 0, 0, 0.4); }
+  .frase { padding: 14px; gap: 12px; }
   .frase { box-shadow: inset 0 0 0 3px #4caf2a, 4px 4px 0 rgba(0, 0, 0, 0.4); }
-  .estrela { display: none; }
-  .recente-aluno img, .frase img { width: 50px; height: 50px; }
+  .frase img { width: 50px; height: 50px; }
   .frase p { font-size: 9px; }
   .rodape-conteudo { padding: 16px 14px; }
 }

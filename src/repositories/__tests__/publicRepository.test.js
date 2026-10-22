@@ -31,18 +31,6 @@ describe('publicRepository', () => {
     await expect(publicRepository.getRankingPublico('abc', 'm1')).resolves.toEqual([])
   })
 
-  it('getConquistasPublicas resolves the unlocked achievements', async () => {
-    const rows = [{ aluno_id: 'a1', aluno_nome: 'Ana', conquista_nome: 'Pontual', conquista_icone: 'clock', data_conquistada: '2026-10-01' }]
-    rpcMock.mockResolvedValueOnce({ data: rows, error: null })
-    await expect(publicRepository.getConquistasPublicas('abc')).resolves.toEqual(rows)
-    expect(rpcMock).toHaveBeenCalledWith('rpc_conquistas_publicas', { p_slug: 'abc' })
-  })
-
-  it('getConquistasPublicas resolves an empty array when nothing was unlocked', async () => {
-    rpcMock.mockResolvedValueOnce({ data: [], error: null })
-    await expect(publicRepository.getConquistasPublicas('abc')).resolves.toEqual([])
-  })
-
   it('getMissaoPublica resolves the current mission', async () => {
     const row = { titulo: 'Missão', descricao: 'Entregar tudo', meta: 5, progresso_atual: 3 }
     rpcMock.mockResolvedValueOnce({ data: [row], error: null })

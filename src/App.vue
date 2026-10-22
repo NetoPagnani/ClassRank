@@ -51,13 +51,6 @@ async function handleLogout() {
         <RouterLink
           class="text-slate-200 hover:text-rank-gold transition-colors"
           active-class="text-rank-gold border-b-2 border-rank-gold"
-          :to="{ name: 'conquistas' }"
-        >
-          Conquistas
-        </RouterLink>
-        <RouterLink
-          class="text-slate-200 hover:text-rank-gold transition-colors"
-          active-class="text-rank-gold border-b-2 border-rank-gold"
           :to="{ name: 'sobre' }"
         >
           Sobre

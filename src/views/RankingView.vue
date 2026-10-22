@@ -5,10 +5,8 @@ import { useMateriasStore } from '../stores/materias.js'
 import { useAlunosStore } from '../stores/alunos.js'
 import { useTarefasStore } from '../stores/tarefas.js'
 import { useAvaliacoesStore } from '../stores/avaliacoes.js'
-import { useConquistasStore } from '../stores/conquistas.js'
 import { useTurmaMateriasStore } from '../stores/turmaMaterias.js'
 import { useRanking } from '../composables/useRanking.js'
-import { avaliarConquistas } from '../domain/ConquistaEngine.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
 import { classificarRanking } from '../domain/RankingPosicoes.js'
 import { ImportParserFactory } from '../domain/importParsers/ImportParserFactory.js'
@@ -20,7 +18,6 @@ const materiasStore = useMateriasStore()
 const alunosStore = useAlunosStore()
 const tarefasStore = useTarefasStore()
 const avaliacoesStore = useAvaliacoesStore()
-const conquistasStore = useConquistasStore()
 const turmaMateriasStore = useTurmaMateriasStore()
 
 const turmaId = ref('')
@@ -165,7 +162,6 @@ async function confirmarImportacao() {
     await tarefasStore.saveNota(aluno.id, tarefaId, nota, entregueEm)
     if (tarefasStore.error) break
     lancadas += 1
-    await verificarConquistas(aluno.id)
   }
   const resultado = tarefasStore.error
     ? `Parou depois de ${lancadas} nota(s): ${tarefasStore.error}`
@@ -182,7 +178,6 @@ function notaDaTarefa(tarefaId, alunoId) {
 async function salvarNota(tarefaId, alunoId, valor) {
   if (valor === '' || valor === null) return
   await tarefasStore.saveNota(alunoId, tarefaId, Number(valor), new Date().toISOString())
-  await verificarConquistas(alunoId)
 }
 
 async function salvarAvaliacao(alunoId) {
@@ -194,38 +189,6 @@ async function salvarAvaliacao(alunoId) {
     prova2: draft.prova2,
     participacao: draft.participacao
   })
-  await verificarConquistas(alunoId)
-}
-
-// Monta o contexto do aluno e roda as 3 regras de conquista (Strategy):
-// pontual (entregou tudo no prazo), nota_maxima (nota final >= 9) e
-// presença exemplar (participação >= 9 em TODAS as matérias já avaliadas).
-async function verificarConquistas(alunoId) {
-  const linha = ranking.value.find((l) => l.aluno.id === alunoId)
-  if (!linha) return
-
-  const tarefasEntregues = tarefas.value
-    .map((tarefa) => {
-      const nota = tarefasStore.notasByTarefa[tarefa.id]?.[alunoId]
-      if (!nota?.entregueEm) return null
-      return { dataEntrega: new Date(nota.entregueEm), prazo: new Date(tarefa.dataEntrega) }
-    })
-    .filter(Boolean)
-
-  const avaliacoesDoAluno = await avaliacoesStore.listByAluno(alunoId)
-  const participacaoPorMateria = avaliacoesDoAluno
-    .map((av) => av.participacao)
-    .filter((p) => p !== null && p !== undefined)
-
-  const codigosDesbloqueados = avaliarConquistas({
-    tarefasEntregues,
-    notaFinal: linha.notaFinal,
-    participacaoPorMateria
-  })
-
-  for (const codigo of codigosDesbloqueados) {
-    await conquistasStore.unlock(alunoId, codigo)
-  }
 }
 
 // Histórico de tarefas já lançadas por aluno — fica tudo registrado (nenhuma

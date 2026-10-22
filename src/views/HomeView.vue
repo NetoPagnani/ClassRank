@@ -29,7 +29,7 @@ function linkPublico(slug) {
       </p>
     </div>
 
-    <div class="grid sm:grid-cols-3 gap-4">
+    <div class="grid sm:grid-cols-2 gap-4">
       <RouterLink :to="{ name: 'turmas' }" class="pixel-corners pixel-panel p-4 hover:brightness-125">
         <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-2">Turmas</h2>
         <p class="text-xl text-slate-100">{{ turmasStore.items.length }} turma(s) cadastrada(s)</p>
@@ -37,10 +37,6 @@ function linkPublico(slug) {
       <RouterLink :to="{ name: 'ranking' }" class="pixel-corners pixel-panel p-4 hover:brightness-125">
         <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-2">Ranking</h2>
         <p class="text-xl text-slate-100">Lançar notas e ver o ranking</p>
-      </RouterLink>
-      <RouterLink :to="{ name: 'conquistas' }" class="pixel-corners pixel-panel p-4 hover:brightness-125">
-        <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-2">Conquistas</h2>
-        <p class="text-xl text-slate-100">Veja as conquistas desbloqueadas</p>
       </RouterLink>
     </div>
 
