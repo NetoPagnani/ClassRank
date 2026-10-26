@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import logo from '../assets/logo.png'
+import PasswordInput from '../components/PasswordInput.vue'
 
 // Tela aberta pelo link do e-mail "Recuperar senha": o link já deixa o professor
 // com uma sessão de recuperação, então basta gravar a senha nova
@@ -45,27 +46,11 @@ async function salvar() {
     <form v-else class="space-y-3 text-xl" @submit.prevent="salvar">
       <div>
         <label for="senha" class="block text-sm font-bold text-rank-gold mb-1">Nova senha</label>
-        <input
-          id="senha"
-          v-model="senha"
-          type="password"
-          required
-          minlength="6"
-          autocomplete="new-password"
-          class="w-full pixel-input pixel-corners px-2 py-1"
-        />
+        <PasswordInput id="senha" v-model="senha" required minlength="6" autocomplete="new-password" />
       </div>
       <div>
         <label for="confirmacao" class="block text-sm font-bold text-rank-gold mb-1">Repita a nova senha</label>
-        <input
-          id="confirmacao"
-          v-model="confirmacao"
-          type="password"
-          required
-          minlength="6"
-          autocomplete="new-password"
-          class="w-full pixel-input pixel-corners px-2 py-1"
-        />
+        <PasswordInput id="confirmacao" v-model="confirmacao" required minlength="6" autocomplete="new-password" />
       </div>
       <button type="submit" :disabled="authStore.loading" class="w-full pixel-corners pixel-btn py-2 disabled:opacity-50">
         Salvar nova senha

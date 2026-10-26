@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.js'
 import logo from '../assets/logo.png'
+import PasswordInput from '../components/PasswordInput.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -63,14 +64,12 @@ function irPara(novoModo) {
       </div>
       <div v-if="modo !== 'recuperar'">
         <label for="password" class="block text-sm font-bold text-rank-gold mb-1">Senha</label>
-        <input
+        <PasswordInput
           id="password"
           v-model="password"
-          type="password"
           :required="modo !== 'recuperar'"
           :autocomplete="modo === 'cadastrar' ? 'new-password' : 'current-password'"
           minlength="6"
-          class="w-full pixel-input pixel-corners px-2 py-1"
         />
       </div>
       <button type="submit" :disabled="authStore.loading" class="w-full pixel-corners pixel-btn py-2 disabled:opacity-50">
