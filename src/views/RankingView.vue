@@ -79,6 +79,11 @@ const posicaoPorAluno = computed(
   () => new Map(classificarRanking(ranking.value).map((l) => [l.aluno.id, l.posicao]))
 )
 
+// Célula fixa precisa de fundo opaco, senão as notas aparecem por baixo ao rolar
+function fundoColunaFixa(alunoId) {
+  return posicaoPorAluno.value.get(alunoId) <= 3 ? 'bg-rank-navy' : 'bg-rank-navyLight'
+}
+
 onMounted(async () => {
   await Promise.all([turmasStore.fetchAll(), materiasStore.fetchAll()])
 })
@@ -336,17 +341,19 @@ function historicoDoAluno(alunoId) {
         </div>
       </section>
 
-      <section class="pixel-corners pixel-panel p-4 overflow-x-auto">
+      <section class="pixel-corners pixel-panel p-4">
         <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-1">Ranking</h2>
         <p v-if="avaliacoesStore.error" class="text-red-400 text-sm">{{ avaliacoesStore.error }}</p>
 
         <PodiumTop3 v-if="ranking.length > 0" :linhas="ranking" />
 
+        <!-- Só a tabela rola para o lado; as colunas # e Aluno ficam fixas na esquerda -->
+        <div class="tabela-rolagem overflow-x-auto pb-2">
         <table class="min-w-full text-sm text-xl">
           <thead>
             <tr class="text-left border-b border-rank-navy text-rank-gold">
-              <th class="p-2">#</th>
-              <th class="p-2">Aluno</th>
+              <th class="p-2 sticky left-0 z-10 w-16 min-w-16 bg-rank-navyLight">#</th>
+              <th class="p-2 sticky left-16 z-10 min-w-40 bg-rank-navyLight coluna-fixa-borda">Aluno</th>
               <th v-for="tarefa in tarefas" :key="tarefa.id" class="p-2">{{ tarefa.titulo }}</th>
               <th class="p-2">Prova 1</th>
               <th class="p-2">Prova 2</th>
@@ -361,8 +368,8 @@ function historicoDoAluno(alunoId) {
               :class="posicaoPorAluno.get(linha.aluno.id) <= 3 ? 'bg-rank-navy' : ''"
               class="border-b border-rank-navy"
             >
-              <td class="p-2">{{ posicaoPorAluno.get(linha.aluno.id) }}º {{ posicaoPorAluno.get(linha.aluno.id) <= 3 ? '🏆' : '' }}</td>
-              <td class="p-2">{{ linha.aluno.nome }}</td>
+              <td class="p-2 sticky left-0 z-10 w-16 min-w-16" :class="fundoColunaFixa(linha.aluno.id)">{{ posicaoPorAluno.get(linha.aluno.id) }}º {{ posicaoPorAluno.get(linha.aluno.id) <= 3 ? '🏆' : '' }}</td>
+              <td class="p-2 sticky left-16 z-10 min-w-40 coluna-fixa-borda" :class="fundoColunaFixa(linha.aluno.id)">{{ linha.aluno.nome }}</td>
               <td v-for="tarefa in tarefas" :key="tarefa.id" class="p-2">
                 <input
                   type="number"
@@ -430,6 +437,7 @@ function historicoDoAluno(alunoId) {
             </template>
           </tbody>
         </table>
+        </div>
         <p v-if="alunos.length === 0" class="text-slate-200 text-sm mt-2">
           Nenhum aluno nesta turma ainda. Cadastre em "Turmas".
         </p>

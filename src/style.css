@@ -50,3 +50,25 @@ body {
 .pixel-input::placeholder {
   color: #5c6d8a;
 }
+
+/* Tabela de notas: barra de rolagem lateral visível e divisória da coluna fixa */
+.tabela-rolagem {
+  scrollbar-color: #f5b942 #0b1526;
+}
+
+.tabela-rolagem::-webkit-scrollbar {
+  height: 12px;
+}
+
+.tabela-rolagem::-webkit-scrollbar-track {
+  background: #0b1526;
+}
+
+.tabela-rolagem::-webkit-scrollbar-thumb {
+  background: #f5b942;
+  border: 2px solid #0b1526;
+}
+
+.coluna-fixa-borda {
+  box-shadow: 3px 0 0 0 #0a1220;
+}
