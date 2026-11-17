@@ -4,7 +4,6 @@ import { useTurmasStore } from '../stores/turmas.js'
 import { useMateriasStore } from '../stores/materias.js'
 import { useAlunosStore } from '../stores/alunos.js'
 import { useTarefasStore } from '../stores/tarefas.js'
-import { useAvaliacoesStore } from '../stores/avaliacoes.js'
 import { useTurmaMateriasStore } from '../stores/turmaMaterias.js'
 import { useRanking } from '../composables/useRanking.js'
 import PodiumTop3 from '../components/PodiumTop3.vue'
@@ -17,7 +16,6 @@ const turmasStore = useTurmasStore()
 const materiasStore = useMateriasStore()
 const alunosStore = useAlunosStore()
 const tarefasStore = useTarefasStore()
-const avaliacoesStore = useAvaliacoesStore()
 const turmaMateriasStore = useTurmaMateriasStore()
 
 const turmaId = ref('')
@@ -39,39 +37,10 @@ const alunos = computed(() => alunosStore.itemsByTurma[turmaId.value] ?? [])
 const tarefas = computed(
   () => tarefasStore.itemsByTurmaMateria[`${turmaId.value}:${materiaId.value}`] ?? []
 )
-const avaliacoesByAluno = computed(() => {
-  const map = {}
-  for (const aluno of alunos.value) {
-    map[aluno.id] = avaliacoesStore.itemsByAlunoMateria[`${aluno.id}:${materiaId.value}`]
-  }
-  return map
-})
-
-// Rascunho local por aluno: evita que dois campos (prova1/prova2/participação)
-// salvos quase ao mesmo tempo pisem um no outro — o @change de cada input lê o
-// rascunho inteiro (já atualizado de forma síncrona pelo v-model), nunca o
-// valor possivelmente desatualizado que ainda está no store.
-const avaliacoesDraft = reactive({})
-
-watch(
-  avaliacoesByAluno,
-  (map) => {
-    for (const [alunoId, av] of Object.entries(map)) {
-      avaliacoesDraft[alunoId] = {
-        prova1: av?.prova1 ?? null,
-        prova2: av?.prova2 ?? null,
-        participacao: av?.participacao ?? null
-      }
-    }
-  },
-  { deep: true }
-)
-
 const ranking = useRanking({
   alunos,
   tarefas,
-  notasByTarefa: computed(() => tarefasStore.notasByTarefa),
-  avaliacoesByAluno
+  notasByTarefa: computed(() => tarefasStore.notasByTarefa)
 })
 
 // Empatados recebem a mesma posição na coluna "#"
@@ -92,7 +61,6 @@ async function carregarDados() {
   if (!turmaId.value || !materiaId.value) return
   await alunosStore.fetchByTurma(turmaId.value)
   await tarefasStore.fetchByTurmaMateria(turmaId.value, materiaId.value)
-  await Promise.all(alunos.value.map((a) => avaliacoesStore.fetchByAlunoMateria(a.id, materiaId.value)))
 }
 
 watch([turmaId, materiaId], carregarDados)
@@ -183,17 +151,6 @@ function notaDaTarefa(tarefaId, alunoId) {
 async function salvarNota(tarefaId, alunoId, valor) {
   if (valor === '' || valor === null) return
   await tarefasStore.saveNota(alunoId, tarefaId, Number(valor), new Date().toISOString())
-}
-
-async function salvarAvaliacao(alunoId) {
-  const draft = avaliacoesDraft[alunoId]
-  await avaliacoesStore.upsert({
-    alunoId,
-    materiaId: materiaId.value,
-    prova1: draft.prova1,
-    prova2: draft.prova2,
-    participacao: draft.participacao
-  })
 }
 
 // Histórico de tarefas já lançadas por aluno — fica tudo registrado (nenhuma
@@ -343,7 +300,6 @@ function historicoDoAluno(alunoId) {
 
       <section class="pixel-corners pixel-panel p-4">
         <h2 class="text-rank-gold text-2xl font-bold uppercase tracking-wide mb-1">Ranking</h2>
-        <p v-if="avaliacoesStore.error" class="text-red-400 text-sm">{{ avaliacoesStore.error }}</p>
 
         <PodiumTop3 v-if="ranking.length > 0" :linhas="ranking" />
 
@@ -355,9 +311,6 @@ function historicoDoAluno(alunoId) {
               <th class="p-2 sticky left-0 z-10 w-16 min-w-16 bg-rank-navyLight">#</th>
               <th class="p-2 sticky left-16 z-10 min-w-40 bg-rank-navyLight coluna-fixa-borda">Aluno</th>
               <th v-for="tarefa in tarefas" :key="tarefa.id" class="p-2">{{ tarefa.titulo }}</th>
-              <th class="p-2">Prova 1</th>
-              <th class="p-2">Prova 2</th>
-              <th class="p-2">Participação</th>
               <th class="p-2">Nota final</th>
               <th class="p-2">Histórico</th>
             </tr>
@@ -379,33 +332,6 @@ function historicoDoAluno(alunoId) {
                   @change="salvarNota(tarefa.id, linha.aluno.id, $event.target.value)"
                 />
               </td>
-              <td class="p-2" v-if="avaliacoesDraft[linha.aluno.id]">
-                <input
-                  v-model.number="avaliacoesDraft[linha.aluno.id].prova1"
-                  type="number"
-                  step="0.1"
-                  class="pixel-input pixel-corners px-1 w-16"
-                  @change="salvarAvaliacao(linha.aluno.id)"
-                />
-              </td>
-              <td class="p-2" v-if="avaliacoesDraft[linha.aluno.id]">
-                <input
-                  v-model.number="avaliacoesDraft[linha.aluno.id].prova2"
-                  type="number"
-                  step="0.1"
-                  class="pixel-input pixel-corners px-1 w-16"
-                  @change="salvarAvaliacao(linha.aluno.id)"
-                />
-              </td>
-              <td class="p-2" v-if="avaliacoesDraft[linha.aluno.id]">
-                <input
-                  v-model.number="avaliacoesDraft[linha.aluno.id].participacao"
-                  type="number"
-                  step="0.1"
-                  class="pixel-input pixel-corners px-1 w-16"
-                  @change="salvarAvaliacao(linha.aluno.id)"
-                />
-              </td>
               <td class="p-2 font-pixel text-xs text-rank-gold">{{ linha.notaFinal.toFixed(1) }}</td>
               <td class="p-2">
                 <button class="pixel-corners pixel-btn px-2 py-1 text-base" @click="alternarHistorico(linha.aluno.id)">
@@ -414,7 +340,7 @@ function historicoDoAluno(alunoId) {
               </td>
             </tr>
             <tr v-if="historicoAberto[linha.aluno.id]" class="border-b border-rank-navy bg-rank-navyDark">
-              <td :colspan="tarefas.length + 7" class="p-3">
+              <td :colspan="tarefas.length + 4" class="p-3">
                 <p class="text-rank-gold text-xl uppercase tracking-wide mb-2">
                   Histórico de {{ linha.aluno.nome }} — pontuação acumulada no bimestre
                 </p>
@@ -429,8 +355,7 @@ function historicoDoAluno(alunoId) {
                   <li v-if="tarefas.length === 0" class="text-slate-200">Nenhuma tarefa cadastrada ainda.</li>
                 </ul>
                 <p class="text-lg mt-2">
-                  Média das tarefas: <span class="text-rank-gold">{{ linha.mediaTarefas.toFixed(1) }}</span>
-                  — Nota final atual: <span class="text-rank-gold">{{ linha.notaFinal.toFixed(1) }}</span>
+                  Nota final atual (média das tarefas): <span class="text-rank-gold">{{ linha.notaFinal.toFixed(1) }}</span>
                 </p>
               </td>
             </tr>

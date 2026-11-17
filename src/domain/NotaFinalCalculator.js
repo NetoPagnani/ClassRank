@@ -1,8 +1,7 @@
 /**
  * Strategy for computing a student's final grade.
  *
- * Nota final = média simples das 4 categorias (cada uma na escala 0-10):
- * média das tarefas, Prova 1, Prova 2 e Participação.
+ * Nota final = média das tarefas lançadas, na escala 0-10.
  */
 
 /**
@@ -18,14 +17,4 @@ export function calcularMediaTarefas(tarefas) {
 
   const soma = tarefas.reduce((total, { nota, notaMaxima }) => total + (nota / notaMaxima) * 10, 0)
   return soma / tarefas.length
-}
-
-/**
- * Nota final: média simples das 4 categorias (0-10 cada).
- *
- * @param {{mediaTarefas: number, prova1: number, prova2: number, participacao: number}} notas
- * @returns {number}
- */
-export function calcularNotaFinal({ mediaTarefas, prova1, prova2, participacao }) {
-  return (mediaTarefas + prova1 + prova2 + participacao) / 4
 }

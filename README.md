@@ -1,12 +1,12 @@
 # [EduQuest](https://eduquestneto.vercel.app/login)
 
-Aplicativo web para o professor acompanhar tarefas do CMSP, lançar notas e participação dos alunos, com um ranking gamificado (estilo jogo retrô, pixel art) por turma. Alunos acessam o ranking da própria turma por um link público, sem precisar de conta.
+Aplicativo web para o professor acompanhar tarefas do CMSP, lançar as notas dos alunos, com um ranking gamificado (estilo jogo retrô, pixel art) por turma. Alunos acessam o ranking da própria turma por um link público, sem precisar de conta.
 
 ## Funcionalidades
 
 - Login/cadastro do professor restrito a e-mails `@professor.educacao.sp.gov.br`.
 - Gestão de turmas, matérias (ligadas por turma) e alunos, com foto real ou avatar padrão.
-- Lançamento de tarefas do CMSP, notas e provas (Prova 1, Prova 2, Participação).
+- Lançamento de tarefas do CMSP e notas; a nota final é a média das tarefas.
 - Ranking automático com pódio Top 3, histórico de tarefas por aluno.
 - Conquistas automáticas (pontual, nota máxima, presença exemplar) e missão semanal por turma.
 - Link público por turma (`/t/:slug`) para os alunos verem o ranking, sem login.

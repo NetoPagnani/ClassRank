@@ -14,7 +14,7 @@
 
 - **Turmas**: criar turma, criar matéria (fica só dentro da turma), ligar/desligar matéria na turma, excluir turma/matéria.
 - **Alunos**: adicionar aluno, trocar nome (Editar), excluir, trocar avatar padrão (os dois quadradinhos) ou subir foto real (Escolher arquivo).
-- **Ranking**: escolher turma + matéria, cadastrar uma tarefa do CMSP, lançar nota da tarefa + Prova 1 + Prova 2 + Participação, ver o pódio Top 3 e o histórico de cada aluno ("Ver").
+- **Ranking**: escolher turma + matéria, cadastrar uma tarefa do CMSP, lançar as notas das tarefas (a nota final é a média delas), ver o pódio Top 3 e o histórico de cada aluno ("Ver").
 - **Importar notas**: no Ranking, em "Importar notas", escolha a tarefa, clique em **"Baixar modelo"**, preencha as notas no Excel e envie o arquivo; confira a prévia e clique em "Lançar".
 - **Missão da semana**: em Turmas, com uma turma selecionada, criar/editar a missão (título, meta, progresso).
 - **Conquistas**: catálogo geral + conquistas de um aluno específico. Algumas são automáticas (nota máxima, pontualidade, presença exemplar).

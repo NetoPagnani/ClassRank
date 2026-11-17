@@ -2,7 +2,7 @@
 
 ## O que é
 
-App web (Vue 3 + Supabase) para o professor gerenciar turmas, matérias e alunos, lançar tarefas do CMSP/notas/provas/participação, com ranking gamificado estilo jogo retrô (pódio, conquistas, missão semanal). Alunos acessam o ranking da própria turma por um link público (`/t/:slug`), sem login.
+App web (Vue 3 + Supabase) para o professor gerenciar turmas, matérias e alunos, lançar tarefas do CMSP e notas, com ranking gamificado estilo jogo retrô (pódio, conquistas, missão semanal). Alunos acessam o ranking da própria turma por um link público (`/t/:slug`), sem login.
 
 ## Links
 
@@ -25,7 +25,7 @@ Vue 3 (`<script setup>`) + Vite + Pinia + Vue Router + Tailwind CSS + Supabase (
 ## O que já está pronto
 
 - Login/cadastro de professor com recuperação de senha ("Esqueci minha senha" no login → e-mail → tela `/redefinir-senha`), turmas, matérias (ligadas por turma via tabela `turma_materias`), alunos (foto real ou avatar padrão escolhível, editar nome, excluir).
-- Lançamento de tarefas CMSP + notas + Prova 1/2/Participação, ranking automático, pódio Top 3 (empatados dividem o degrau), histórico de tarefas por aluno.
+- Lançamento de tarefas CMSP + notas (nota final = média das tarefas; Prova 1/2 e Participação foram removidas), ranking automático, pódio Top 3 (empatados dividem o degrau), histórico de tarefas por aluno.
 - Importação de notas por planilha no Ranking: botão "Baixar modelo" (.xlsx já com todos os alunos da turma) e envio de CSV/Excel com prévia antes de lançar (nomes comparados sem acento/maiúscula; nota em branco é ignorada).
 - Página pública da turma (`/t/:slug`) com visual de jogo: cenário com castelo, pódio com coroas, placas de madeira, tabela com todos os alunos e conquistas, missão da semana, conquista recente e frase.
 - 3 conquistas automáticas (pontual, nota máxima, presença exemplar) + missão semanal por turma (editável pelo professor).
@@ -70,5 +70,5 @@ Tudo do código está publicado (último commit no ar: `60fdab3`, recuperação 
 - "Confirm email" do Supabase Auth está ligado (conferido em 18/10/2026 pela conta existente, confirmada por e-mail).
 - Push para o GitHub usa SSH (chave já cadastrada na conta `NetoPagnani`).
 - Variáveis de ambiente (Supabase) já estão configuradas tanto no `.env.local` local quanto no Vercel.
-- Migrations ficam em `supabase/migrations/` (até `0012`, que fez a página pública ligar conquistas pelo id do aluno) e já estão aplicadas no projeto Supabase.
+- Migrations ficam em `supabase/migrations/` (até `0014`, que tirou Prova 1/2 e Participação da nota final do ranking público).
 - Canvas do redesign da página pública (Claude Design): https://claude.ai/artifact/7FLBfPTzJM15h9CApzvG27
