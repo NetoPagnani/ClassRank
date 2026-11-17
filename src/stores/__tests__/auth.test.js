@@ -64,7 +64,7 @@ describe('useAuthStore', () => {
 
       await expect(store.signUp('a@professor.educacao.sp.gov.br', 'x')).resolves.toBeUndefined()
 
-      expect(store.error).toBe('User already registered')
+      expect(store.error).toMatch(/Já existe uma conta/)
       expect(store.user).toBeNull()
     })
   })
@@ -92,7 +92,7 @@ describe('useAuthStore', () => {
       await expect(store.signIn('a@a.com', 'wrong')).resolves.toBeUndefined()
 
       expect(store.user).toBeNull()
-      expect(store.error).toBe('Invalid login credentials')
+      expect(store.error).toMatch(/E-mail ou senha incorretos/)
     })
   })
 

@@ -5,8 +5,9 @@ import { useAuthStore } from '../stores/auth.js'
 import logo from '../assets/logo.png'
 import PasswordInput from '../components/PasswordInput.vue'
 
-// Tela aberta pelo link do e-mail "Recuperar senha": o link já deixa o professor
-// com uma sessão de recuperação, então basta gravar a senha nova
+// Tela aberta pelo link do e-mail "Recuperar senha" (o link já deixa o professor
+// com uma sessão de recuperação) ou pelo "Alterar senha" do menu, já logado:
+// nos dois casos basta gravar a senha nova
 const authStore = useAuthStore()
 const router = useRouter()
 
@@ -56,6 +57,7 @@ async function salvar() {
         Salvar nova senha
       </button>
       <p v-if="erroLocal || authStore.error" class="text-red-400 text-sm">{{ erroLocal || authStore.error }}</p>
+      <RouterLink :to="{ name: 'home' }" class="block text-sm text-rank-gold underline">Voltar sem alterar</RouterLink>
     </form>
   </div>
 </template>

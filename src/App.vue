@@ -56,6 +56,9 @@ async function handleLogout() {
           Sobre
         </RouterLink>
       </nav>
+      <RouterLink class="text-slate-200 hover:text-rank-gold transition-colors text-lg" :to="{ name: 'redefinir-senha' }">
+        Alterar senha
+      </RouterLink>
       <button class="pixel-corners pixel-btn px-3 py-2" @click="handleLogout">Sair</button>
     </header>
     <main :class="route.meta.telaCheia ? '' : 'p-4 max-w-5xl mx-auto'">
